@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class MainServer 
-{
+public class MainServer {
 
 	private ProtocolWorker protocolWorker;
 	private SharedInformation sharedInformation;
@@ -18,17 +17,17 @@ public class MainServer
 	public void run() throws IOException {
 		ServerSocket serverSocket = new ServerSocket(7777);
 
-		while(true) {
+		while (true) {
 			Socket socket = serverSocket.accept();
 			new Thread(new ClientListener(socket, protocolWorker)).start();
 		}
 	}
 
-    public static void main( String[] args ) {
+	public static void main(String[] args) {
 		try {
 			new MainServer().run();
 		} catch (IOException ex) {
 			System.out.println("Error!");
 		}
-    }
+	}
 }
