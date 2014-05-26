@@ -1,7 +1,6 @@
 package br.com.oraculo.server;
 
 import br.com.oraculo.exceptions.ProtocolWorkerException;
-import br.com.oraculo.models.Score;
 import br.com.oraculo.tasks.AddInRoomTask;
 import br.com.oraculo.tasks.GenerateScoreTask;
 import java.io.IOException;

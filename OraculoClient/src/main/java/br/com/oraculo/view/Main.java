@@ -177,7 +177,7 @@ public class Main extends javax.swing.JFrame {
 
     private void miConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectActionPerformed
 		try {
-			socketController.connect("10.1.1.4", 7777, "sala01", "jadson");
+			socketController.connect("127.0.0.1", 7777, "sala01", "jadson");
 		} catch (UnconnectException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
