@@ -1,6 +1,7 @@
 package br.com.oraculo.server;
 
 import br.com.oraculo.models.Client;
+import br.com.oraculo.models.Question;
 import br.com.oraculo.models.Room;
 import br.com.oraculo.models.Score;
 import java.io.Serializable;
@@ -20,6 +21,7 @@ public class SharedInformation implements Serializable {
 	private static JPPFClient jppfClient = null;
 	private Set<Room> rooms;
 	private List<Score> scores;
+	private List<Question> questions;
 
 	public SharedInformation() {
 		rooms = new HashSet<Room>();
@@ -42,6 +44,7 @@ public class SharedInformation implements Serializable {
 		}
 
 		room.subscribeClient(client);
+		room.setQuestions(questions);
 		rooms.add(room);
 	}
 
@@ -70,6 +73,14 @@ public class SharedInformation implements Serializable {
 
 		Collections.sort(rScore);
 		return rScore;
+	}
+
+	public List<Question> getQuestions() {
+		return Collections.unmodifiableList(questions);
+	}
+
+	public void setQuestions(List<Question> questions) {
+		this.questions = questions;
 	}
 
 	public void printRooms() {

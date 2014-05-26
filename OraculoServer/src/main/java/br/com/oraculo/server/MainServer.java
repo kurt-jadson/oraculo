@@ -1,8 +1,13 @@
 package br.com.oraculo.server;
 
+import br.com.oraculo.models.Question;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
 public class MainServer {
 
@@ -12,6 +17,7 @@ public class MainServer {
 	public MainServer() throws IOException {
 		sharedInformation = new SharedInformation();
 		protocolWorker = new ProtocolWorker(sharedInformation);
+		loadQuestions();
 	}
 
 	public void run() throws IOException {
@@ -21,6 +27,16 @@ public class MainServer {
 			Socket socket = serverSocket.accept();
 			new Thread(new ClientListener(socket, protocolWorker)).start();
 		}
+	}
+
+	private void loadQuestions() {
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory("oraculoPU");
+		EntityManager em = emf.createEntityManager();
+//		TypedQuery<Question> query = em.createQuery(Question.NQ_FIND_ALL, Question.class);
+		TypedQuery<Question> query = 
+				em.createQuery("SELECT q from br.com.oraculo.models.Question q", 
+				Question.class);
+		sharedInformation.setQuestions(query.getResultList());
 	}
 
 	public static void main(String[] args) {
