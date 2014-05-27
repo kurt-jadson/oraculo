@@ -174,22 +174,22 @@ public class Main extends javax.swing.JFrame {
 			Question question = socketController.get();
 			System.out.println(question);
 
-			//Answer Question Test
-			QuestionOption userAnswer = QuestionOption.A;
-			QuestionOption serverAnswer = socketController.send(question.getId(), userAnswer);
-			System.out.println("userAnswer: " + userAnswer);
-			System.out.println("serverAnswer: " + serverAnswer);
-			System.out.println(userAnswer.equals(serverAnswer));
-
-			//Score test
-			List<Score> scores = socketController.score();
-			for (Score s : scores) {
-				score.add(new ScoreUserInfo(s.getClient().getNickname(), s.getScore()));
-			}
-
-			score.update(score.getGraphics());
-			shape.add(new QuestionScreen(500));
-			shape.update(shape.getGraphics());
+//			//Answer Question Test
+//			QuestionOption userAnswer = QuestionOption.A;
+//			QuestionOption serverAnswer = socketController.send(question.getId(), userAnswer);
+//			System.out.println("userAnswer: " + userAnswer);
+//			System.out.println("serverAnswer: " + serverAnswer);
+//			System.out.println(userAnswer.equals(serverAnswer));
+//
+//			//Score test
+//			List<Score> scores = socketController.score();
+//			for (Score s : scores) {
+//				score.add(new ScoreUserInfo(s.getClient().getNickname(), s.getScore()));
+//			}
+//
+//			score.update(score.getGraphics());
+//			shape.add(new QuestionScreen(500));
+//			shape.update(shape.getGraphics());
 		} catch (CommunicationException ce) {
 			JOptionPane.showMessageDialog(null, ce.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}

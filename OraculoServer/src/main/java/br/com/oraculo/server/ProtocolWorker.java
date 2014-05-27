@@ -11,6 +11,7 @@ import br.com.oraculo.tasks.GenerateScoreTask;
 import br.com.oraculo.tasks.GetQuestionTask;
 import br.com.oraculo.tasks.ProcessAnswerTask;
 import br.com.oraculo.tasks.VerifyTask;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -103,8 +104,12 @@ public class ProtocolWorker {
 			JPPFJob job = createJob("Verify", task);
 			executeBlockingJob(job);
 
-			writer.write(objectToSend.toString());
-			writer.flush();
+			BufferedOutputStream bufferStream = new BufferedOutputStream(socket.getOutputStream());
+			int b = Boolean.TRUE.equals((Boolean) objectToSend) ? 1 : 0;
+			bufferStream.write(b);
+			bufferStream.flush();
+//			writer.write(objectToSend.toString());
+//			writer.flush();
 		} catch(Exception ex) {
 			throw new ProtocolWorkerException("Impossible to verify answers.");
 		} finally {

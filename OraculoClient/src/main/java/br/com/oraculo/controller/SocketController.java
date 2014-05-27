@@ -5,7 +5,7 @@ import br.com.oraculo.exceptions.UnconnectException;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
-import java.io.IOException;
+import java.io.BufferedInputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -65,8 +65,10 @@ public class SocketController {
 			writer.println(messageToServer);
 			writer.flush();
 
-			String advance = reader.nextLine();
-			if (advance.equals("false")) {
+//			String advance = reader.nextLine();
+			BufferedInputStream scan = new BufferedInputStream(socket.getInputStream());
+			int advance = scan.read();
+			if (advance == 0) {
 				Thread.sleep(2000);
 				verify();
 			}
