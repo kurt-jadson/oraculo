@@ -1,7 +1,7 @@
 package br.com.oraculo.component;
 
-import br.com.oraculo.enums.QuestionOption;
 import br.com.oraculo.listeners.OptionClickListener;
+import br.com.oraculo.models.QuestionOption;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;

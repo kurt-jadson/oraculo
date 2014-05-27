@@ -1,6 +1,8 @@
 package br.com.oraculo.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,9 +17,11 @@ public class Room implements Serializable {
 	private String name;
 	private Set<Client> clients;
 	private List<Question> questions;
+	private boolean started;
 
 	public Room() {
 		clients = new HashSet<Client>();
+		questions = new ArrayList<Question>();
 	}
 
 	public String getName() {
@@ -28,6 +32,14 @@ public class Room implements Serializable {
 		this.name = name;
 	}
 
+	public void start() {
+		started = true;
+	}
+
+	public boolean isStarted() {
+		return started;
+	}
+
 	public void subscribeClient(Client client) {
 		clients.add(client);
 	}
@@ -36,8 +48,31 @@ public class Room implements Serializable {
 		clients.remove(client);
 	}
 
+	public Client getClient(String id) {
+		for(Client client : clients) {
+			if(client.getId().equals(id)) {
+				return client;
+			}
+		}
+
+		return null;
+	}
+
+	public Set<Client> getClients() {
+		return Collections.unmodifiableSet(clients);
+	}
+
 	public void setQuestions(List<Question> questions) {
 		this.questions = questions;
+	}
+
+	public Question getQuestion() {
+		if(questions.isEmpty()) {
+			return null;
+		}
+		
+		Collections.shuffle(questions);
+		return questions.remove(0);
 	}
 
 	@Override

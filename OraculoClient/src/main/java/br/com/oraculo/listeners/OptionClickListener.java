@@ -1,7 +1,7 @@
 package br.com.oraculo.listeners;
 
 import br.com.oraculo.component.QuestionScreen;
-import br.com.oraculo.enums.QuestionOption;
+import br.com.oraculo.models.QuestionOption;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

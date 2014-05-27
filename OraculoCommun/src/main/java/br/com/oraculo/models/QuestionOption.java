@@ -6,6 +6,26 @@ package br.com.oraculo.models;
  */
 public enum QuestionOption {
 
-	A, B, C, D;
-	
+	A(1), B(2), C(3), D(4), NONE(0);
+	private final int identifierNumber;
+
+	private QuestionOption(int identifierNumber) {
+		this.identifierNumber = identifierNumber;
+	}
+
+	public int getIdentifierNumber() {
+		return identifierNumber;
+	}
+
+	public static QuestionOption getByIdentifierNumber(int idfNm) {
+		QuestionOption[] options = QuestionOption.values();
+
+		for (QuestionOption opt : options) {
+			if (opt.getIdentifierNumber() == idfNm) {
+				return opt;
+			}
+		}
+
+		return NONE;
+	}
 }

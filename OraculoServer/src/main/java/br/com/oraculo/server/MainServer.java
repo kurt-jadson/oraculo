@@ -11,12 +11,10 @@ import javax.persistence.TypedQuery;
 
 public class MainServer {
 
-	private ProtocolWorker protocolWorker;
 	private SharedInformation sharedInformation;
 
 	public MainServer() throws IOException {
 		sharedInformation = new SharedInformation();
-		protocolWorker = new ProtocolWorker(sharedInformation);
 		loadQuestions();
 	}
 
@@ -25,7 +23,7 @@ public class MainServer {
 
 		while (true) {
 			Socket socket = serverSocket.accept();
-			new Thread(new ClientListener(socket, protocolWorker)).start();
+			new Thread(new ClientListener(socket, sharedInformation)).start();
 		}
 	}
 

@@ -1,6 +1,8 @@
 package br.com.oraculo.models;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -11,6 +13,11 @@ public class Client implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String id;
 	private String nickname;
+	private Map<Question, Long> timeoutQuestion;
+
+	public Client() {
+		timeoutQuestion = new HashMap<Question, Long>();
+	}
 
 	public String getId() {
 		return id;
@@ -26,6 +33,24 @@ public class Client implements Serializable {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public void addQuestion(Question question) {
+		timeoutQuestion.put(question, System.currentTimeMillis());
+	}
+
+	public void markAsAnswered(Question question) {
+		timeoutQuestion.put(question, -1L);
+	}
+
+	public long getStartedTime(Question question) {
+		Long l = timeoutQuestion.get(question);
+		return l == null ? -1l : l;
+	}
+
+	public long getTimeElapsed(Question question) {
+		long currentTime = System.currentTimeMillis();
+		return currentTime - timeoutQuestion.get(question);
 	}
 
 	@Override

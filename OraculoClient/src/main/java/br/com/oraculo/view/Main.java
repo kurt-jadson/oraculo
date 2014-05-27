@@ -5,6 +5,8 @@ import br.com.oraculo.component.ScoreUserInfo;
 import br.com.oraculo.controller.SocketController;
 import br.com.oraculo.exceptions.CommunicationException;
 import br.com.oraculo.exceptions.UnconnectException;
+import br.com.oraculo.models.Question;
+import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -162,6 +164,24 @@ public class Main extends javax.swing.JFrame {
 
     private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
 		try {
+			//Starting
+			socketController.start();
+
+			//Verify Test
+			socketController.verify();
+
+			//Get Question Test
+			Question question = socketController.get();
+			System.out.println(question);
+
+			//Answer Question Test
+			QuestionOption userAnswer = QuestionOption.A;
+			QuestionOption serverAnswer = socketController.send(question.getId(), userAnswer);
+			System.out.println("userAnswer: " + userAnswer);
+			System.out.println("serverAnswer: " + serverAnswer);
+			System.out.println(userAnswer.equals(serverAnswer));
+
+			//Score test
 			List<Score> scores = socketController.score();
 			for (Score s : scores) {
 				score.add(new ScoreUserInfo(s.getClient().getNickname(), s.getScore()));
