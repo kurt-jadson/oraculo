@@ -11,6 +11,8 @@ import java.util.Map;
 public class Client implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+	public static final long ALREADY_ANSWERED = -1l;
+	public static final long NOT_YET_ANSWERED = -2l;
 	private String id;
 	private String nickname;
 	private Map<Question, Long> timeoutQuestion;
@@ -45,7 +47,7 @@ public class Client implements Serializable {
 
 	public long getStartedTime(Question question) {
 		Long l = timeoutQuestion.get(question);
-		return l == null ? -1l : l;
+		return l == null ? NOT_YET_ANSWERED : l;
 	}
 
 	public long getTimeElapsed(Question question) {

@@ -13,7 +13,7 @@ import org.jppf.node.protocol.AbstractTask;
  */
 public class GetQuestionTask extends AbstractTask<String> {
 
-	private SharedInformation sharedInformation;
+	private final SharedInformation sharedInformation;
 	private String clientId;
 	private String roomName;
 	private Question question;
@@ -48,10 +48,12 @@ public class GetQuestionTask extends AbstractTask<String> {
 			question = sharedInformation.getQuestion(room);
 
 			Client client = sharedInformation.getClient(clientId, room);
+			System.out.println("Client in GetQuestion: " + client);
 			if(client != null) {
 				client.addQuestion(question);
 			}
 		} catch(NoMoreQuestionsException nmqe) {
+			System.out.println("No more questions.");
 			//TODO: notificar cliente
 		}
 	}

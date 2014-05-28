@@ -14,7 +14,7 @@ import org.jppf.node.protocol.AbstractTask;
  */
 public class VerifyTask extends AbstractTask<String> {
 
-	private SharedInformation sharedInformation;
+	private final SharedInformation sharedInformation;
 	private Room room;
 	private Boolean verified;
 
@@ -44,7 +44,11 @@ public class VerifyTask extends AbstractTask<String> {
 			Question question = sharedInformation.getQuestion(room);
 
 			for (Client client : clients) {
-				if (client.getStartedTime(question) != -1L) {
+				Long startedTime = client.getStartedTime(question);
+				if (startedTime != Client.ALREADY_ANSWERED) {
+					if(startedTime == Client.NOT_YET_ANSWERED) {
+						verified = Boolean.TRUE;
+					}
 					return;
 				}
 			}

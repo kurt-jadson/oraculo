@@ -1,5 +1,6 @@
 package br.com.oraculo.server;
 
+import br.com.oraculo.exceptions.NoMoreQuestionsException;
 import br.com.oraculo.exceptions.ProtocolWorkerException;
 import br.com.oraculo.exceptions.RoomStartedException;
 import br.com.oraculo.models.Client;
@@ -18,6 +19,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jppf.JPPFException;
 import org.jppf.client.JPPFJob;
 import org.jppf.node.protocol.Task;
@@ -31,7 +34,7 @@ public class ProtocolWorker {
 
 	private SharedInformation sharedInformation;
 	private Object objectToSend;
-	private PrintWriter writer;
+	private BufferedOutputStream writer;
 	private Scanner reader;
 
 	public ProtocolWorker(SharedInformation sharedInformation) {
@@ -64,7 +67,7 @@ public class ProtocolWorker {
 	private void connect(String clientId, String room, String nickname, Socket socket) 
 			throws ProtocolWorkerException {
 		try {
-			writer = new PrintWriter(socket.getOutputStream());
+			writer = new BufferedOutputStream(socket.getOutputStream());
 			reader = new Scanner(socket.getInputStream());
 
 			AddInRoomTask task = new AddInRoomTask(sharedInformation);
@@ -108,8 +111,6 @@ public class ProtocolWorker {
 			int b = Boolean.TRUE.equals((Boolean) objectToSend) ? 1 : 0;
 			bufferStream.write(b);
 			bufferStream.flush();
-//			writer.write(objectToSend.toString());
-//			writer.flush();
 		} catch(Exception ex) {
 			throw new ProtocolWorkerException("Impossible to verify answers.");
 		} finally {
@@ -125,6 +126,11 @@ public class ProtocolWorker {
 
 			JPPFJob job = createJob("GetQuestion", task);
 			executeBlockingJob(job);
+
+			Room r = new Room();
+			r.setName(room);
+			Client c = sharedInformation.getClient(clientId, r);
+			System.out.println(c.getTimeElapsed((Question) objectToSend));
 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
 			objectOutputStream.writeObject(objectToSend);
@@ -166,20 +172,30 @@ public class ProtocolWorker {
 			task.setQuestion(question);
 			task.setUserAnswer(QuestionOption.getByIdentifierNumber(Integer.valueOf(answer)));
 
+			Room r = new Room();
+			r.setName(room);
+			Client c = sharedInformation.getClient(clientId, r);
+			System.out.println(c.getTimeElapsed(question));
+
 			JPPFJob job = createJob("ProcessAnswer", task);
 			executeBlockingJob(job);
 
-			writer.print(question.getAnswer().getIdentifierNumber());
+			writer.write(question.getAnswer().getIdentifierNumber());
 			writer.flush();
 		} catch(Exception ex) {
+			ex.printStackTrace();
 			throw new ProtocolWorkerException("Could not send answer.");
 		}
 
 	}
 
 	private void disconnect(String clientId, String roomName) {
-		writer.close();
-		reader.close();
+		try {
+			writer.close();
+			reader.close();
+		} catch(IOException ex) {
+
+		}
 	}
 
 	private Question findQuestionById(Long questionId) {
@@ -218,6 +234,11 @@ public class ProtocolWorker {
 				GetQuestionTask getQuestionTask = (GetQuestionTask) o;
 				sharedInformation = getQuestionTask.getSharedInformation();
 				objectToSend = getQuestionTask.getQuestion();
+
+				Room r = new Room();
+				r.setName("sala01");
+				Client c = sharedInformation.getClient("aaaaaaaaaa", r);
+				System.out.println("TIme: " + c.getTimeElapsed(getQuestionTask.getQuestion()));
 			} else if (o instanceof GenerateScoreTask) {
 				GenerateScoreTask generateScoreTask = (GenerateScoreTask) o;
 				objectToSend = generateScoreTask.getScores();
