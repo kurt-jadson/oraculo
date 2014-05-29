@@ -10,6 +10,7 @@ import br.com.oraculo.tasks.AddInRoomTask;
 import br.com.oraculo.tasks.GenerateScoreTask;
 import br.com.oraculo.tasks.GetQuestionTask;
 import br.com.oraculo.tasks.ProcessAnswerTask;
+import br.com.oraculo.tasks.ReturnResultTask;
 import br.com.oraculo.tasks.VerifyTask;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -202,23 +203,13 @@ public class ProtocolWorker {
 			}
 
 			Object o = task.getTaskObject();
-			if (o instanceof AddInRoomTask) {
-				AddInRoomTask addInRoomTask = (AddInRoomTask) o;
-				SharedInformation.changeInstance(addInRoomTask.getSharedInformation());
-			} else if (o instanceof GetQuestionTask) {
-				GetQuestionTask getQuestionTask = (GetQuestionTask) o;
-				SharedInformation.changeInstance(getQuestionTask.getSharedInformation());
-				objectToSend = getQuestionTask.getQuestion();
+			if (o instanceof ReturnResultTask) {
+				ReturnResultTask returnResultTask = (ReturnResultTask) o;
+				SharedInformation.changeInstance(returnResultTask.getSharedInformation());
+				objectToSend = returnResultTask.getResultObject();
 			} else if (o instanceof GenerateScoreTask) {
 				GenerateScoreTask generateScoreTask = (GenerateScoreTask) o;
 				objectToSend = generateScoreTask.getScores();
-			} else if (o instanceof ProcessAnswerTask) {
-				ProcessAnswerTask processAnswerTask = (ProcessAnswerTask) o;
-				SharedInformation.changeInstance(processAnswerTask.getSharedInformation());
-			} else if (o instanceof VerifyTask) {
-				VerifyTask verifyTask = (VerifyTask) o;
-				objectToSend = verifyTask.getVerified();
-				SharedInformation.changeInstance(verifyTask.getSharedInformation());
 			}
 		}
 	}

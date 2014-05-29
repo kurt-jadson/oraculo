@@ -5,22 +5,20 @@ import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Room;
 import br.com.oraculo.server.SharedInformation;
-import org.jppf.node.protocol.AbstractTask;
 
 /**
  *
  * @author kurt
  */
-public class ProcessAnswerTask extends AbstractTask<String> {
+public class ProcessAnswerTask extends ReturnResultTask {
 
-	private SharedInformation sharedInformation;
 	private String clientId;
 	private String roomName;
 	private Question question; 
 	private QuestionOption userAnswer;
 
 	public ProcessAnswerTask(SharedInformation sharedInformation) {
-		this.sharedInformation = sharedInformation;
+		super(sharedInformation);
 	}
 
 	public void setClientId(String clientId) {
@@ -39,8 +37,9 @@ public class ProcessAnswerTask extends AbstractTask<String> {
 		this.userAnswer = userAnswer;
 	}
 
-	public SharedInformation getSharedInformation() {
-		return sharedInformation;
+	@Override
+	public Object getResultObject() {
+		return null;
 	}
 
 	@Override
@@ -49,7 +48,7 @@ public class ProcessAnswerTask extends AbstractTask<String> {
 
 		Room room = new Room();
 		room.setName(roomName);
-		Client client = sharedInformation.getClient(clientId, room);
+		Client client = getSharedInformation().getClient(clientId, room);
 
 		//Assumed 2s is delay client-server communication
 		long timeElapsed = client.getTimeElapsed(question) - 2000;
@@ -62,7 +61,7 @@ public class ProcessAnswerTask extends AbstractTask<String> {
 			return;
 		}
 
-		sharedInformation.addPunctuation(room, client, question.getAmount());
+		getSharedInformation().addPunctuation(room, client, question.getAmount());
 	}
 
 }

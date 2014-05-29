@@ -5,21 +5,19 @@ import br.com.oraculo.models.Client;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.Room;
 import br.com.oraculo.server.SharedInformation;
-import org.jppf.node.protocol.AbstractTask;
 
 /**
  *
  * @author kurt
  */
-public class GetQuestionTask extends AbstractTask<String> {
+public class GetQuestionTask extends ReturnResultTask {
 
-	private final SharedInformation sharedInformation;
 	private String clientId;
 	private String roomName;
 	private Question question;
 
 	public GetQuestionTask(SharedInformation sharedInformation) {
-		this.sharedInformation = sharedInformation;
+		super(sharedInformation);
 	}
 
 	public void setClientId(String client) {
@@ -30,12 +28,9 @@ public class GetQuestionTask extends AbstractTask<String> {
 		this.roomName = room;
 	}
 
-	public Question getQuestion() {
+	@Override
+	public Question getResultObject() {
 		return question;
-	}
-
-	public SharedInformation getSharedInformation() {
-		return sharedInformation;
 	}
 
 	@Override
@@ -45,9 +40,9 @@ public class GetQuestionTask extends AbstractTask<String> {
 		try {
 			Room room = new Room();
 			room.setName(roomName);
-			question = sharedInformation.getQuestion(room);
+			question = getSharedInformation().getQuestion(room);
 
-			Client client = sharedInformation.getClient(clientId, room);
+			Client client = getSharedInformation().getClient(clientId, room);
 			if(client != null) {
 				client.addQuestion(question);
 			}
