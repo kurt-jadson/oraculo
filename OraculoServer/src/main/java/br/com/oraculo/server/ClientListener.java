@@ -15,10 +15,10 @@ public class ClientListener implements Runnable {
 	private Socket socket;
 	private ProtocolWorker protocolWorker;
 
-	public ClientListener(Socket socket, SharedInformation sharedInformation) {
+	public ClientListener(Socket socket) {
 		try {
 			this.socket = socket;
-			protocolWorker = new ProtocolWorker(sharedInformation);
+			protocolWorker = new ProtocolWorker();
 			reader = new Scanner(socket.getInputStream());
 		} catch (IOException ex) {
 			//notificar o cliente

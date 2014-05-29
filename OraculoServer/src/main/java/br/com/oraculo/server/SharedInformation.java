@@ -24,17 +24,30 @@ import org.jppf.client.JPPFClient;
 public class SharedInformation implements Serializable {
 
 	private static JPPFClient jppfClient = null;
+	private static SharedInformation sharedInformation;
 	private Set<Room> rooms;
 	private List<Score> scores;
 	private List<Question> questions;
 	private Map<Room, Question> questionInTurn;
 	private Map<ClientRoom, Boolean> starteds;
 
-	public SharedInformation() {
+	private SharedInformation() {
 		rooms = new HashSet<Room>();
 		scores = new ArrayList<Score>();
 		questionInTurn = new HashMap<Room, Question>();
 		starteds = new HashMap<ClientRoom, Boolean>();
+	}
+
+	public static SharedInformation getInstance() {
+		if(sharedInformation == null) {
+			sharedInformation = new SharedInformation();
+		}
+		
+		return sharedInformation;
+	}
+
+	public static void changeInstance(final SharedInformation s) {
+		sharedInformation = s;
 	}
 
 	public static JPPFClient getJppfClient() {

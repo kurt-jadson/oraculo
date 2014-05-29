@@ -65,10 +65,8 @@ public class SocketController {
 			writer.println(messageToServer);
 			writer.flush();
 
-//			String advance = reader.nextLine();
-			BufferedInputStream scan = new BufferedInputStream(socket.getInputStream());
-			int advance = scan.read();
-			if (advance == 0) {
+			String advance = reader.nextLine();
+			if (advance.equals("false")) {
 				Thread.sleep(2000);
 				verify();
 			}

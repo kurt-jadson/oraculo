@@ -1,6 +1,5 @@
 package br.com.oraculo.server;
 
-import br.com.oraculo.exceptions.NoMoreQuestionsException;
 import br.com.oraculo.exceptions.ProtocolWorkerException;
 import br.com.oraculo.exceptions.RoomStartedException;
 import br.com.oraculo.models.Client;
@@ -12,15 +11,12 @@ import br.com.oraculo.tasks.GenerateScoreTask;
 import br.com.oraculo.tasks.GetQuestionTask;
 import br.com.oraculo.tasks.ProcessAnswerTask;
 import br.com.oraculo.tasks.VerifyTask;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jppf.JPPFException;
 import org.jppf.client.JPPFJob;
 import org.jppf.node.protocol.Task;
@@ -32,14 +28,9 @@ import org.jppf.server.protocol.JPPFTask;
  */
 public class ProtocolWorker {
 
-	private SharedInformation sharedInformation;
 	private Object objectToSend;
-	private BufferedOutputStream writer;
+	private PrintWriter writer;
 	private Scanner reader;
-
-	public ProtocolWorker(SharedInformation sharedInformation) {
-		this.sharedInformation = sharedInformation;
-	}
 
 	public void execute(String command, String clientId, Socket socket, String... parameters)
 			throws ProtocolWorkerException {
@@ -64,13 +55,13 @@ public class ProtocolWorker {
 
 	}
 
-	private void connect(String clientId, String room, String nickname, Socket socket) 
+	private void connect(String clientId, String room, String nickname, Socket socket)
 			throws ProtocolWorkerException {
 		try {
-			writer = new BufferedOutputStream(socket.getOutputStream());
+			writer = new PrintWriter(socket.getOutputStream());
 			reader = new Scanner(socket.getInputStream());
 
-			AddInRoomTask task = new AddInRoomTask(sharedInformation);
+			AddInRoomTask task = new AddInRoomTask(SharedInformation.getInstance());
 			task.setClientId(clientId);
 			task.setNickname(nickname);
 			task.setRoom(room);
@@ -90,8 +81,8 @@ public class ProtocolWorker {
 			Client client = new Client();
 			client.setId(clientId);
 
-			sharedInformation.start(client, room);
-		} catch(RoomStartedException ex) {
+			SharedInformation.getInstance().start(client, room);
+		} catch (RoomStartedException ex) {
 			throw new ProtocolWorkerException(ex.getMessage());
 		}
 	}
@@ -101,17 +92,15 @@ public class ProtocolWorker {
 			Room room = new Room();
 			room.setName(roomName);
 
-			VerifyTask task = new VerifyTask(sharedInformation);
+			VerifyTask task = new VerifyTask(SharedInformation.getInstance());
 			task.setRoom(room);
 
 			JPPFJob job = createJob("Verify", task);
 			executeBlockingJob(job);
 
-			BufferedOutputStream bufferStream = new BufferedOutputStream(socket.getOutputStream());
-			int b = Boolean.TRUE.equals((Boolean) objectToSend) ? 1 : 0;
-			bufferStream.write(b);
-			bufferStream.flush();
-		} catch(Exception ex) {
+			writer.println(objectToSend.toString());
+			writer.flush();
+		} catch (Exception ex) {
 			throw new ProtocolWorkerException("Impossible to verify answers.");
 		} finally {
 			objectToSend = null;
@@ -120,17 +109,12 @@ public class ProtocolWorker {
 
 	private void get(String clientId, String room, Socket socket) throws ProtocolWorkerException {
 		try {
-			GetQuestionTask task = new GetQuestionTask(sharedInformation);
+			GetQuestionTask task = new GetQuestionTask(SharedInformation.getInstance());
 			task.setClientId(clientId);
 			task.setRoom(room);
 
 			JPPFJob job = createJob("GetQuestion", task);
 			executeBlockingJob(job);
-
-			Room r = new Room();
-			r.setName(room);
-			Client c = sharedInformation.getClient(clientId, r);
-			System.out.println(c.getTimeElapsed((Question) objectToSend));
 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
 			objectOutputStream.writeObject(objectToSend);
@@ -144,7 +128,7 @@ public class ProtocolWorker {
 
 	private void score(String room, Socket socket) throws ProtocolWorkerException {
 		try {
-			GenerateScoreTask task = new GenerateScoreTask(sharedInformation);
+			GenerateScoreTask task = new GenerateScoreTask(SharedInformation.getInstance());
 			task.setRoom(room);
 
 			JPPFJob job = createJob("Getting score from room " + room, task);
@@ -162,27 +146,22 @@ public class ProtocolWorker {
 		}
 	}
 
-	private void send(String clientId, String room, String questionId, String answer, Socket socket) 
+	private void send(String clientId, String room, String questionId, String answer, Socket socket)
 			throws ProtocolWorkerException {
 		try {
 			Question question = findQuestionById(Long.valueOf(questionId));
-			ProcessAnswerTask task = new ProcessAnswerTask(sharedInformation);
+			ProcessAnswerTask task = new ProcessAnswerTask(SharedInformation.getInstance());
 			task.setClientId(clientId);
 			task.setRoomName(room);
 			task.setQuestion(question);
 			task.setUserAnswer(QuestionOption.getByIdentifierNumber(Integer.valueOf(answer)));
 
-			Room r = new Room();
-			r.setName(room);
-			Client c = sharedInformation.getClient(clientId, r);
-			System.out.println(c.getTimeElapsed(question));
-
 			JPPFJob job = createJob("ProcessAnswer", task);
 			executeBlockingJob(job);
 
-			writer.write(question.getAnswer().getIdentifierNumber());
+			writer.println(question.getAnswer().getIdentifierNumber());
 			writer.flush();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw new ProtocolWorkerException("Could not send answer.");
 		}
@@ -190,17 +169,13 @@ public class ProtocolWorker {
 	}
 
 	private void disconnect(String clientId, String roomName) {
-		try {
-			writer.close();
-			reader.close();
-		} catch(IOException ex) {
-
-		}
+		writer.close();
+		reader.close();
 	}
 
 	private Question findQuestionById(Long questionId) {
-		for(Question q : sharedInformation.getQuestions()) {
-			if(q.getId().equals(questionId)) {
+		for (Question q : SharedInformation.getInstance().getQuestions()) {
+			if (q.getId().equals(questionId)) {
 				return q;
 			}
 		}
@@ -229,26 +204,21 @@ public class ProtocolWorker {
 			Object o = task.getTaskObject();
 			if (o instanceof AddInRoomTask) {
 				AddInRoomTask addInRoomTask = (AddInRoomTask) o;
-				sharedInformation = addInRoomTask.getSharedInformation();
+				SharedInformation.changeInstance(addInRoomTask.getSharedInformation());
 			} else if (o instanceof GetQuestionTask) {
 				GetQuestionTask getQuestionTask = (GetQuestionTask) o;
-				sharedInformation = getQuestionTask.getSharedInformation();
+				SharedInformation.changeInstance(getQuestionTask.getSharedInformation());
 				objectToSend = getQuestionTask.getQuestion();
-
-				Room r = new Room();
-				r.setName("sala01");
-				Client c = sharedInformation.getClient("aaaaaaaaaa", r);
-				System.out.println("TIme: " + c.getTimeElapsed(getQuestionTask.getQuestion()));
 			} else if (o instanceof GenerateScoreTask) {
 				GenerateScoreTask generateScoreTask = (GenerateScoreTask) o;
 				objectToSend = generateScoreTask.getScores();
 			} else if (o instanceof ProcessAnswerTask) {
 				ProcessAnswerTask processAnswerTask = (ProcessAnswerTask) o;
-				sharedInformation = processAnswerTask.getSharedInformation();
+				SharedInformation.changeInstance(processAnswerTask.getSharedInformation());
 			} else if (o instanceof VerifyTask) {
 				VerifyTask verifyTask = (VerifyTask) o;
 				objectToSend = verifyTask.getVerified();
-				sharedInformation = verifyTask.getSharedInformation();
+				SharedInformation.changeInstance(verifyTask.getSharedInformation());
 			}
 		}
 	}

@@ -63,7 +63,7 @@ public class Room implements Serializable {
 	}
 
 	public void setQuestions(List<Question> questions) {
-		this.questions = questions;
+		this.questions.addAll(questions);
 	}
 
 	public Question getQuestion() {

@@ -48,7 +48,6 @@ public class GetQuestionTask extends AbstractTask<String> {
 			question = sharedInformation.getQuestion(room);
 
 			Client client = sharedInformation.getClient(clientId, room);
-			System.out.println("Client in GetQuestion: " + client);
 			if(client != null) {
 				client.addQuestion(question);
 			}

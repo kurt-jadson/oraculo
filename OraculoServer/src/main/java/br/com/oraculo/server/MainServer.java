@@ -11,10 +11,7 @@ import javax.persistence.TypedQuery;
 
 public class MainServer {
 
-	private SharedInformation sharedInformation;
-
 	public MainServer() throws IOException {
-		sharedInformation = new SharedInformation();
 		loadQuestions();
 	}
 
@@ -23,7 +20,7 @@ public class MainServer {
 
 		while (true) {
 			Socket socket = serverSocket.accept();
-			new Thread(new ClientListener(socket, sharedInformation)).start();
+			new Thread(new ClientListener(socket)).start();
 		}
 	}
 
@@ -34,7 +31,7 @@ public class MainServer {
 		TypedQuery<Question> query = 
 				em.createQuery("SELECT q from br.com.oraculo.models.Question q", 
 				Question.class);
-		sharedInformation.setQuestions(query.getResultList());
+		SharedInformation.getInstance().setQuestions(query.getResultList());
 	}
 
 	public static void main(String[] args) {
