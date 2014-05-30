@@ -1,11 +1,18 @@
 package br.com.oraculo.component;
 
 import br.com.oraculo.listeners.OptionClickListener;
+import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JViewport;
+import javax.swing.ViewportLayout;
 import javax.swing.border.EtchedBorder;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
  *
@@ -14,28 +21,33 @@ import javax.swing.border.EtchedBorder;
 public class QuestionScreen extends JPanel {
 
 	private QuestionOption selected = QuestionOption.NONE;
+	private Question question;
+	private JViewport questionAreaPanel;
+	private JButton[] alternatives;
 	private ActionListener optionClickListener;
-	private int size;
+	private int height;
+	private int width;
 
-	public QuestionScreen(int height) {
+	public QuestionScreen(int height, int width) {
 		optionClickListener = new OptionClickListener(this);
-		this.size = height;
+		this.height = height;
+		this.width = width;
 		drawQuestionArea();
 		drawOptions();
-		setBounds(0, 0, 250, height);
+		setBounds(0, 0, width, height);
 	}
 
 	private void drawQuestionArea() {
-		JPanel questionAreaPanel = new JPanel();
-		EtchedBorder border = new EtchedBorder(EtchedBorder.RAISED);
-		questionAreaPanel.setBounds(10, 10, 250, size - 346);
-		questionAreaPanel.setBorder(border);
+		questionAreaPanel = new JViewport();
+		questionAreaPanel.setLayout(new ViewportLayout());
+		questionAreaPanel.setBounds(10, 10, width - 10, height - 346);
 		add(questionAreaPanel);
 	}
 
 	private void drawOptions() {
 		QuestionOption[] options = QuestionOption.values();
-		int questionArea = size - 346;
+		alternatives = new JButton[options.length];
+		int questionArea = height - 346;
 
 		for(int i = 0, j = options.length - 1; i < j; i++) {
 			QuestionOption option = options[i];
@@ -45,7 +57,24 @@ public class QuestionScreen extends JPanel {
 			optionButton.addActionListener(optionClickListener);
 			optionButton.setActionCommand(Integer.valueOf(option.getIdentifierNumber()).toString());
 			add(optionButton);
+			alternatives[i] = optionButton;
 		}
+	}
+
+	public void setQuestion(Question question) {
+		this.question = question;
+
+		JLabel labelQuestion = new JLabel(question.getQuestion());
+		labelQuestion.setBounds(0, 0, 400, 100);
+		questionAreaPanel.add(labelQuestion);
+		alternatives[0].setText(question.getAlternativeA());
+		alternatives[1].setText(question.getAlternativeB());
+		alternatives[2].setText(question.getAlternativeC());
+		alternatives[3].setText(question.getAlternativeD());
+	}
+
+	public Question getQuestion() {
+		return question;
 	}
 
 	public QuestionOption getSelected() {

@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 public class Main extends javax.swing.JFrame {
 
 	private SocketController socketController;
+	private QuestionScreen questionScreen;
 
 	/**
 	 * Creates new form Main
@@ -164,36 +165,48 @@ public class Main extends javax.swing.JFrame {
 
     private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
 		try {
-			//Starting
-			socketController.start();
+			if ("Iniciar".equals(evt.getActionCommand())) {
+				socketController.start();
+				socketController.verify();
+				requestQuestion();
+				btnNext.setText("Confirmar");
+			} else if ("Confirmar".equals(evt.getActionCommand())) {
+				//Send answer to server and receive correct answer from.
+				Long questionId = questionScreen.getQuestion().getId();
+				QuestionOption response = questionScreen.getSelected();
+				QuestionOption correct = socketController.send(questionId, response);
 
-			//Verify Test
-			socketController.verify();
+				//Compare receive answer to answer sended
+				if (response.equals(correct)) {
+					System.out.println("Resposta correta.");
+				} else {
+					System.out.println("Resposta incorreta.");
+				}
 
-			//Get Question Test
-			Question question = socketController.get();
-			System.out.println(question);
+				//Request room's score
+				List<Score> scores = socketController.score();
+				for (Score s : scores) {
+					score.add(new ScoreUserInfo(s.getClient().getNickname(), s.getScore()));
+				}
+				score.update(score.getGraphics());
 
-			//Answer Question Test
-			QuestionOption userAnswer = QuestionOption.A;
-			QuestionOption serverAnswer = socketController.send(question.getId(), userAnswer);
-			System.out.println("userAnswer: " + userAnswer);
-			System.out.println("serverAnswer: " + serverAnswer);
-			System.out.println(userAnswer.equals(serverAnswer));
-
-			//Score test
-			List<Score> scores = socketController.score();
-			for (Score s : scores) {
-				score.add(new ScoreUserInfo(s.getClient().getNickname(), s.getScore()));
+				socketController.verify();
+				requestQuestion();
 			}
 
-			score.update(score.getGraphics());
-			shape.add(new QuestionScreen(500));
-			shape.update(shape.getGraphics());
 		} catch (CommunicationException ce) {
 			JOptionPane.showMessageDialog(null, ce.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_btnNextActionPerformed
+
+	private void requestQuestion() throws CommunicationException {
+		Question question = socketController.get();
+		questionScreen = new QuestionScreen(500, 500);
+		questionScreen.setQuestion(question);
+		shape.add(questionScreen);
+		shape.update(shape.getGraphics());
+		System.out.println("Received " + question);
+	}
 
     private void miConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectActionPerformed
 		try {

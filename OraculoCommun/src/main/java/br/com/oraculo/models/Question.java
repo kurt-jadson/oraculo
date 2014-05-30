@@ -42,6 +42,8 @@ public class Question implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private QuestionOption answer;
 	private Integer amount;
+	@Enumerated(EnumType.STRING)
+	private SubjectArea theme;
 	private Integer timeToAnswer;
 
 	public Long getId() {
@@ -74,6 +76,10 @@ public class Question implements Serializable {
 
 	public Integer getAmount() {
 		return amount;
+	}
+
+	public SubjectArea getTheme() {
+		return theme;
 	}
 
 	public Integer getTimeToAnswer() {
