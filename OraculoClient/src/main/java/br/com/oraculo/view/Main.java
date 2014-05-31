@@ -6,13 +6,10 @@ import br.com.oraculo.controller.SocketController;
 import br.com.oraculo.exceptions.ClientSideException;
 import br.com.oraculo.exceptions.CommunicationException;
 import br.com.oraculo.exceptions.SuccessException;
-import br.com.oraculo.exceptions.UnconnectException;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**

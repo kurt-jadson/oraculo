@@ -42,9 +42,9 @@ public class ProtocolWorker {
 		if ("connect".equals(command)) {
 			connect(clientId, parameters[0], parameters[1], socket);
 		} else if ("start".equals(command)) {
-			start(clientId, parameters[0]);
+			start(parameters[0]);
 		} else if ("verify".equals(command)) {
-			verify(parameters[0], socket);
+			verify(parameters[0], socket, clientId);
 		} else if ("get".equals(command)) {
 			get(clientId, parameters[0], socket);
 		} else if ("score".equals(command)) {
@@ -72,36 +72,34 @@ public class ProtocolWorker {
 			executeBlockingJob(job);
 
 			Room room = SharedInformation.getInstance().getRoom(roomName);
-			if(room.isStarted()) {
+			if (room.isStarted()) {
 				throw new RoomStartedException();
 			}
 
+			System.out.println(SharedInformation.getInstance().getClients(room));
+
 			writer.println("done");
 			writer.flush();
-		} catch(ServerException ex) {
+		} catch (ServerException ex) {
 			throw ex;
 		} catch (Exception ex) {
 			throw new ProtocolWorkerException("Could not connect client to room.");
 		}
 	}
 
-	private void start(String clientId, String roomName) throws ProtocolWorkerException {
-		try {
-			Room room = SharedInformation.getInstance().getRoom(roomName);
-			Client client = SharedInformation.getInstance().getClient(clientId, room);
-			SharedInformation.getInstance().start(client, room);
-		} catch (RoomStartedException ex) {
-			throw new ProtocolWorkerException(ex.getMessage());
-		}
+	private void start(String roomName) throws ProtocolWorkerException {
+		Room room = SharedInformation.getInstance().getRoom(roomName);
+		SharedInformation.getInstance().start(room);
 	}
 
-	private void verify(String roomName, Socket socket) throws ProtocolWorkerException {
+	private void verify(String roomName, Socket socket, String clientId) throws ProtocolWorkerException {
 		try {
 			Room room = SharedInformation.getInstance().getRoom(roomName);
 
 			VerifyTask task = new VerifyTask(SharedInformation.getInstance());
 			task.setRoom(room);
 
+			System.out.println("Preparando para executar pedido de " + clientId);
 			JPPFJob job = createJob("Verify", task);
 			executeBlockingJob(job);
 

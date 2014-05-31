@@ -3,12 +3,13 @@ package br.com.oraculo.models;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
  * @author kurt
  */
-public class Client implements Serializable {
+public class Client implements Serializable, Mergeable<Client> {
 	
 	private static final long serialVersionUID = 1L;
 	public static final long ALREADY_ANSWERED = -1l;
@@ -55,6 +56,10 @@ public class Client implements Serializable {
 		return currentTime - timeoutQuestion.get(question);
 	}
 
+	public Map<Question, Long> getTimeoutQuestions() {
+		return timeoutQuestion;
+	}
+
 	@Override
 	public int hashCode() {
 		int hash = 7;
@@ -75,6 +80,26 @@ public class Client implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	public void merge(Client m) {
+		Map<Question, Long> mTimeouts = m.getTimeoutQuestions();
+
+		for(Entry<Question, Long> entry : timeoutQuestion.entrySet()) {
+			for(Entry<Question, Long> mEntry : mTimeouts.entrySet()) {
+				if(!entry.equals(mEntry)) {
+					if(timeoutQuestion.containsKey(mEntry.getKey())) {
+						Long l = timeoutQuestion.get(entry.getKey());
+						Long ml = mTimeouts.get(mEntry.getKey());
+						Long newValue = ml < l ? ml : l;
+						timeoutQuestion.put(mEntry.getKey(), newValue);
+					} else {
+						timeoutQuestion.put(mEntry.getKey(), mEntry.getValue());
+					}
+				}
+			}
+		}
+
 	}
 
 }

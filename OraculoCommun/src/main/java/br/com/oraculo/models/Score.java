@@ -6,7 +6,7 @@ import java.io.Serializable;
  *
  * @author kurt
  */
-public class Score implements Serializable, Comparable<Score> {
+public class Score implements Serializable, Comparable<Score>, Mergeable<Score> {
 
 	private static final long serialVersionUID = 3L;
 	private Client client;
@@ -73,6 +73,12 @@ public class Score implements Serializable, Comparable<Score> {
 
 	public int compareTo(Score o) {
 		return this.getScore().compareTo(o.getScore());
+	}
+
+	public void merge(Score m) {
+		if(m.getScore() > score) {
+			score = m.getScore();
+		}
 	}
 
 }

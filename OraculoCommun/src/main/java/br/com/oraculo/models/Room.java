@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * @author kurt
  */
-public class Room implements Serializable {
+public class Room implements Serializable, Mergeable<Room> {
 
 	private static final long serialVersionUID = 2L;
 	private String name;
@@ -75,8 +75,8 @@ public class Room implements Serializable {
 		return questions.remove(0);
 	}
 
-	public void printQuestions() {
-		System.out.println(questions);
+	public List<Question> getQuestions() {
+		return questions;
 	}
 
 	@Override
@@ -104,6 +104,24 @@ public class Room implements Serializable {
 	@Override
 	public String toString() {
 		return "Room{" + "name=" + name + ", clients=" + clients + '}';
+	}
+
+	public void merge(Room m) {
+		Set<Client> mClients = m.getClients();
+		clients.addAll(mClients);
+
+		for(Client c : clients) {
+			for(Client mClient : mClients) {
+				if(c.equals(mClient)) {
+					c.merge(mClient);
+				}
+			}
+		}
+
+		if(m.getQuestions().size() < questions.size()) {
+			questions = m.getQuestions();
+		}
+
 	}
 
 }

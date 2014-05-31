@@ -1,8 +1,8 @@
 package br.com.oraculo.server;
 
 import br.com.oraculo.exceptions.NoMoreQuestionsException;
-import br.com.oraculo.exceptions.RoomStartedException;
 import br.com.oraculo.models.Client;
+import br.com.oraculo.models.Mergeable;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.Room;
 import br.com.oraculo.models.Score;
@@ -20,7 +20,7 @@ import org.jppf.client.JPPFClient;
  *
  * @author kurt
  */
-public class SharedInformation implements Serializable {
+public class SharedInformation implements Serializable, Mergeable<SharedInformation> {
 
 	private static JPPFClient jppfClient = null;
 	private static SharedInformation sharedInformation;
@@ -28,11 +28,13 @@ public class SharedInformation implements Serializable {
 	private List<Score> scores;
 	private List<Question> questions;
 	private Map<Room, Question> questionInTurn;
+	private long version;
 
 	private SharedInformation() {
 		rooms = new HashSet<Room>();
 		scores = new ArrayList<Score>();
 		questionInTurn = new HashMap<Room, Question>();
+		version = 0l;
 	}
 
 	public static SharedInformation getInstance() {
@@ -44,7 +46,31 @@ public class SharedInformation implements Serializable {
 	}
 
 	public static void changeInstance(final SharedInformation s) {
-		sharedInformation = s;
+		if(s.getVersion() < sharedInformation.getVersion()) {
+			sharedInformation.merge(s);
+		} else {
+			sharedInformation = s;
+		}
+		sharedInformation.upVersion();
+	}
+
+	public void merge(SharedInformation n) {
+		for(Room r : rooms) {
+			r.merge(n.getRoom(r.getName()));
+		}
+
+		scores.addAll(n.getScores());
+		for(Score s : scores) {
+			for(Score mS : n.getScores()) {
+				if(s.equals(mS)) {
+					s.merge(mS);
+				}
+			}
+		}
+
+		System.out.println("Questão no turno ...");
+		System.out.println(questionInTurn);
+		System.out.println(n.getMapQuestions());
 	}
 
 	public static JPPFClient getJppfClient() {
@@ -67,9 +93,11 @@ public class SharedInformation implements Serializable {
 		rooms.add(room);
 	}
 
-	public void start(Client client, Room room) throws RoomStartedException {
-		room.start();
-		questionInTurn.put(room, room.getQuestion());
+	public void start(Room room) {
+		if(!room.isStarted()) {
+			room.start();
+			questionInTurn.put(room, room.getQuestion());
+		}
 	}
 
 	public Room getRoom(String roomName) {
@@ -133,6 +161,10 @@ public class SharedInformation implements Serializable {
 		scores.add(s);
 	}
 
+	public Map<Room, Question> getMapQuestions() {
+		return questionInTurn;
+	}
+
 	public List<Score> getScore(Room room) {
 		List<Score> rScore = new ArrayList<Score>();
 
@@ -146,6 +178,10 @@ public class SharedInformation implements Serializable {
 		return rScore;
 	}
 
+	public List<Score> getScores() {
+		return scores;
+	}
+
 	public void setQuestions(List<Question> questions) {
 		this.questions = questions;
 	}
@@ -157,4 +193,13 @@ public class SharedInformation implements Serializable {
 	public void printRooms() {
 		System.out.println(rooms);
 	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void upVersion() {
+		version++;
+	}
+
 }

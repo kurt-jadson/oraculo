@@ -35,20 +35,24 @@ public class VerifyTask extends ReturnResultTask {
 		System.out.println("Verifying if all clients answered question ...");
 
 		try {
-			Set<Client> clients = getSharedInformation().getClients(room);
+			Set<Client> clients = room.getClients();
 			Question question = getSharedInformation().getQuestion(room);
 
 			for (Client client : clients) {
+				System.out.println("Question in turn: " + question);
+				System.out.println("Client: " + client);
+
 				Long startedTime = client.getStartedTime(question);
 				if (startedTime != Client.ALREADY_ANSWERED) {
 					if (startedTime == Client.NOT_YET_ANSWERED) {
 						verified = Boolean.TRUE;
+						System.out.println("Não respondeu, mas vai");
 					}
 					return;
 				}
+				System.out.println("Já respondeu");
 			}
 
-			System.out.println("Mudando questão ...");
 			verified = Boolean.TRUE;
 			getSharedInformation().changeQuestion(room);
 		} catch (NoMoreQuestionsException ex) {
