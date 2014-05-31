@@ -2,6 +2,7 @@ package br.com.oraculo.server;
 
 import br.com.oraculo.exceptions.ProtocolWorkerException;
 import br.com.oraculo.exceptions.RoomStartedException;
+import br.com.oraculo.exceptions.ServerException;
 import br.com.oraculo.models.Client;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
@@ -34,7 +35,7 @@ public class ProtocolWorker {
 	private Scanner reader;
 
 	public void execute(String command, String clientId, Socket socket, String... parameters)
-			throws ProtocolWorkerException {
+			throws ServerException {
 
 		System.out.println("Client " + clientId + " request command " + command);
 
@@ -56,8 +57,8 @@ public class ProtocolWorker {
 
 	}
 
-	private void connect(String clientId, String room, String nickname, Socket socket)
-			throws ProtocolWorkerException {
+	private void connect(String clientId, String roomName, String nickname, Socket socket)
+			throws ServerException {
 		try {
 			writer = new PrintWriter(socket.getOutputStream());
 			reader = new Scanner(socket.getInputStream());
@@ -65,10 +66,20 @@ public class ProtocolWorker {
 			AddInRoomTask task = new AddInRoomTask(SharedInformation.getInstance());
 			task.setClientId(clientId);
 			task.setNickname(nickname);
-			task.setRoomName(room);
+			task.setRoomName(roomName);
 
 			JPPFJob job = createJob("AddInRoom client " + nickname, task);
 			executeBlockingJob(job);
+
+			Room room = SharedInformation.getInstance().getRoom(roomName);
+			if(room.isStarted()) {
+				throw new RoomStartedException();
+			}
+
+			writer.println("done");
+			writer.flush();
+		} catch(ServerException ex) {
+			throw ex;
 		} catch (Exception ex) {
 			throw new ProtocolWorkerException("Could not connect client to room.");
 		}

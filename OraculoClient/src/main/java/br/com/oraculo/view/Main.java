@@ -3,12 +3,16 @@ package br.com.oraculo.view;
 import br.com.oraculo.component.QuestionScreen;
 import br.com.oraculo.component.ScoreUserInfo;
 import br.com.oraculo.controller.SocketController;
+import br.com.oraculo.exceptions.ClientSideException;
 import br.com.oraculo.exceptions.CommunicationException;
+import br.com.oraculo.exceptions.SuccessException;
 import br.com.oraculo.exceptions.UnconnectException;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -203,6 +207,7 @@ public class Main extends javax.swing.JFrame {
 		Question question = socketController.get();
 		questionScreen = new QuestionScreen(500, 500);
 		questionScreen.setQuestion(question);
+		shape.removeAll();
 		shape.add(questionScreen);
 		shape.update(shape.getGraphics());
 		System.out.println("Received " + question);
@@ -211,7 +216,9 @@ public class Main extends javax.swing.JFrame {
     private void miConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectActionPerformed
 		try {
 			socketController.connect("127.0.0.1", 7777, "sala01", "jadson");
-		} catch (UnconnectException ex) {
+		} catch(SuccessException ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.INFORMATION_MESSAGE);
+		} catch (ClientSideException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_miConnectActionPerformed

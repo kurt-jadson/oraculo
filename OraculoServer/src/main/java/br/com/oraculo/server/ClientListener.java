@@ -1,9 +1,12 @@
 package br.com.oraculo.server;
 
-import br.com.oraculo.exceptions.ProtocolWorkerException;
+import br.com.oraculo.exceptions.ServerException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -40,9 +43,16 @@ public class ClientListener implements Runnable {
 				String clientId = all[1];
 				protocolWorker.execute(command, clientId, socket, parameters);
 			}
-		} catch (ProtocolWorkerException ex) {
-			//notificar o cliente
+		} catch (ServerException ex) {
 			ex.printStackTrace();
+			PrintWriter writer;
+			try {
+				writer = new PrintWriter(socket.getOutputStream());
+				writer.println(ex.getErrorId());
+				writer.flush();
+			} catch (IOException ex1) {
+				Logger.getLogger(ClientListener.class.getName()).log(Level.SEVERE, null, ex1);
+			}
 		}
 	}
 }

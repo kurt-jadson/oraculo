@@ -1,6 +1,9 @@
 package br.com.oraculo.controller;
 
+import br.com.oraculo.exceptions.ClientSideException;
 import br.com.oraculo.exceptions.CommunicationException;
+import br.com.oraculo.exceptions.ServerException;
+import br.com.oraculo.exceptions.SuccessException;
 import br.com.oraculo.exceptions.UnconnectException;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
@@ -23,7 +26,7 @@ public class SocketController {
 	private PrintWriter writer;
 	private Scanner reader;
 
-	public void connect(String host, int port, String room, String nickname) throws UnconnectException {
+	public void connect(String host, int port, String room, String nickname) throws ClientSideException {
 		try {
 			socket = new Socket(host, port);
 			clientId = getClientIdentifier();
@@ -35,6 +38,18 @@ public class SocketController {
 			String messageToServer = buildMessage("connect", clientId, room, nickname);
 			writer.println(messageToServer);
 			writer.flush();
+
+			String response = reader.nextLine();
+			if ("done".equals(response)) {
+				throw new SuccessException("Connected");
+			} else {
+				throw new ServerException(Integer.valueOf(response));
+			}
+		} catch (ServerException ex) {
+			ErrorManager errorManager = new ErrorManager(ex.getApplicationError());
+			errorManager.rethrowServerException();
+		} catch(ClientSideException ex) {
+			throw ex;
 		} catch (Exception ex) {
 			throw new UnconnectException();
 		}

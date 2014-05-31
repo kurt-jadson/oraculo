@@ -3,7 +3,6 @@ package br.com.oraculo.server;
 import br.com.oraculo.exceptions.NoMoreQuestionsException;
 import br.com.oraculo.exceptions.RoomStartedException;
 import br.com.oraculo.models.Client;
-import br.com.oraculo.models.ClientRoom;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.Room;
 import br.com.oraculo.models.Score;
@@ -29,20 +28,18 @@ public class SharedInformation implements Serializable {
 	private List<Score> scores;
 	private List<Question> questions;
 	private Map<Room, Question> questionInTurn;
-	private Map<ClientRoom, Boolean> starteds;
 
 	private SharedInformation() {
 		rooms = new HashSet<Room>();
 		scores = new ArrayList<Score>();
 		questionInTurn = new HashMap<Room, Question>();
-		starteds = new HashMap<ClientRoom, Boolean>();
 	}
 
 	public static SharedInformation getInstance() {
-		if(sharedInformation == null) {
+		if (sharedInformation == null) {
 			sharedInformation = new SharedInformation();
 		}
-		
+
 		return sharedInformation;
 	}
 
@@ -71,34 +68,13 @@ public class SharedInformation implements Serializable {
 	}
 
 	public void start(Client client, Room room) throws RoomStartedException {
-		for(Room r : rooms) {
-			if(r.equals(room)) {
-				if(r.isStarted()) {
-					throw new RoomStartedException();
-				} else {
-					ClientRoom key = new ClientRoom(client, room);
-					starteds.put(key, Boolean.TRUE);
-
-					Set<Client> clients = getClients(room);
-					for(Client c : clients) {
-						ClientRoom k = new ClientRoom(client, room);
-						Boolean b = starteds.get(k);
-						
-						if(Boolean.FALSE.equals(b)) {
-							return;
-						}
-					}
-
-					r.start();
-					questionInTurn.put(r, r.getQuestion());
-				}
-			}
-		}
+		room.start();
+		questionInTurn.put(room, room.getQuestion());
 	}
 
 	public Room getRoom(String roomName) {
-		for(Room r : rooms) {
-			if(roomName.equals(r.getName())) {
+		for (Room r : rooms) {
+			if (roomName.equals(r.getName())) {
 				return r;
 			}
 		}
