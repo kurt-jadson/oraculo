@@ -96,6 +96,15 @@ public class SharedInformation implements Serializable {
 		}
 	}
 
+	public Room getRoom(String roomName) {
+		for(Room r : rooms) {
+			if(roomName.equals(r.getName())) {
+				return r;
+			}
+		}
+		return null;
+	}
+
 	public Question getQuestion(Room room) throws NoMoreQuestionsException {
 		Question questionRound = questionInTurn.get(room);
 

@@ -36,7 +36,7 @@ public class AddInRoomTask extends ReturnResultTask {
 		this.clientId = clientId;
 	}
 
-	public void setRoom(String room) {
+	public void setRoomName(String room) {
 		this.roomName = room;
 	}
 

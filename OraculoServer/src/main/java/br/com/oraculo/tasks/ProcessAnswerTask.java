@@ -12,8 +12,8 @@ import br.com.oraculo.server.SharedInformation;
  */
 public class ProcessAnswerTask extends ReturnResultTask {
 
-	private String clientId;
-	private String roomName;
+	private Client client;
+	private Room room;
 	private Question question; 
 	private QuestionOption userAnswer;
 
@@ -21,12 +21,12 @@ public class ProcessAnswerTask extends ReturnResultTask {
 		super(sharedInformation);
 	}
 
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
+	public void setClient(Client client) {
+		this.client = client;
 	}
 
-	public void setRoomName(String roomName) {
-		this.roomName = roomName;
+	public void setRoom(Room room) {
+		this.room = room;
 	}
 
 	public void setQuestion(Question question) {
@@ -45,10 +45,6 @@ public class ProcessAnswerTask extends ReturnResultTask {
 	@Override
 	public void run() {
 		System.out.println("Processing client answer ...");
-
-		Room room = new Room();
-		room.setName(roomName);
-		Client client = getSharedInformation().getClient(clientId, room);
 
 		//Assumed 2s is delay client-server communication
 		long timeElapsed = client.getTimeElapsed(question) - 2000;

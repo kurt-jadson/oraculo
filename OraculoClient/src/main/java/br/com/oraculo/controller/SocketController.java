@@ -5,7 +5,6 @@ import br.com.oraculo.exceptions.UnconnectException;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
-import java.io.BufferedInputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -45,7 +44,8 @@ public class SocketController {
 		StringBuilder builder = new StringBuilder();
 
 		for (int i = 0; i < 10; i++) {
-			int num = (int) Math.random() * 22 + 97;
+			double d = Math.random();
+			int num = (int) (d * 22 + 97);
 			char c = (char) num;
 			builder.append(c);
 		}

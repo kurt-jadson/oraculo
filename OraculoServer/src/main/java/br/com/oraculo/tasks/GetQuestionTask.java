@@ -12,20 +12,20 @@ import br.com.oraculo.server.SharedInformation;
  */
 public class GetQuestionTask extends ReturnResultTask {
 
-	private String clientId;
-	private String roomName;
+	private Client client;
+	private Room room;
 	private Question question;
 
 	public GetQuestionTask(SharedInformation sharedInformation) {
 		super(sharedInformation);
 	}
 
-	public void setClientId(String client) {
-		this.clientId = client;
+	public void setClient(Client client) {
+		this.client = client;
 	}
 
-	public void setRoom(String room) {
-		this.roomName = room;
+	public void setRoom(Room room) {
+		this.room = room;
 	}
 
 	@Override
@@ -35,17 +35,11 @@ public class GetQuestionTask extends ReturnResultTask {
 
 	@Override
 	public void run() {
-		System.out.println("Getting a question for room " + roomName);
+		System.out.println("Getting a question for room " + room.getName());
 
 		try {
-			Room room = new Room();
-			room.setName(roomName);
 			question = getSharedInformation().getQuestion(room);
-
-			Client client = getSharedInformation().getClient(clientId, room);
-			if(client != null) {
-				client.addQuestion(question);
-			}
+			client.addQuestion(question);
 		} catch(NoMoreQuestionsException nmqe) {
 			System.out.println("No more questions.");
 			//TODO: notificar cliente

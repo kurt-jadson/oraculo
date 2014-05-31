@@ -41,15 +41,16 @@ public class VerifyTask extends ReturnResultTask {
 			for (Client client : clients) {
 				Long startedTime = client.getStartedTime(question);
 				if (startedTime != Client.ALREADY_ANSWERED) {
-					if(startedTime == Client.NOT_YET_ANSWERED) {
+					if (startedTime == Client.NOT_YET_ANSWERED) {
 						verified = Boolean.TRUE;
 					}
 					return;
 				}
 			}
 
-			getSharedInformation().changeQuestion(room);
+			System.out.println("Mudando questão ...");
 			verified = Boolean.TRUE;
+			getSharedInformation().changeQuestion(room);
 		} catch (NoMoreQuestionsException ex) {
 			//TODO: notificar cliente
 		}

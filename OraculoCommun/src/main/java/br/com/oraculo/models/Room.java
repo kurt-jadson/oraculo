@@ -75,6 +75,10 @@ public class Room implements Serializable {
 		return questions.remove(0);
 	}
 
+	public void printQuestions() {
+		System.out.println(questions);
+	}
+
 	@Override
 	public int hashCode() {
 		int hash = 7;

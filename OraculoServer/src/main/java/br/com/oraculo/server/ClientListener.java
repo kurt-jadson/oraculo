@@ -29,7 +29,6 @@ public class ClientListener implements Runnable {
 		try {
 			String message;
 			while ((message = reader.nextLine()) != null) {
-				System.out.println("Executando .... " + message);
 				String[] all = message.split(":");
 				String[] parameters = new String[all.length - 2];
 

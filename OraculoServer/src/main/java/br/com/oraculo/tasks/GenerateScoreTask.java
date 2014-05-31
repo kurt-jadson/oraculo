@@ -4,34 +4,32 @@ import br.com.oraculo.models.Room;
 import br.com.oraculo.models.Score;
 import br.com.oraculo.server.SharedInformation;
 import java.util.List;
-import org.jppf.node.protocol.AbstractTask;
 
 /**
  *
  * @author kurt
  */
-public class GenerateScoreTask extends AbstractTask<String> {
+public class GenerateScoreTask extends ReturnResultTask {
 
 	private Room room;
-	private final SharedInformation sharedInformation;
 	private List<Score> scores;
 
 	public GenerateScoreTask(SharedInformation sharedInformation) {
-		this.sharedInformation = sharedInformation;
+		super(sharedInformation);
 	}
 
 	@Override
 	public void run() {
 		System.out.println("Generate " + room.getName() + "'s scores ...");
-		scores = sharedInformation.getScore(room);
+		scores = getSharedInformation().getScore(room);
 	}
 
-	public void setRoom(String roomName) {
-		room = new Room();
-		room.setName(roomName);
+	public void setRoom(Room room) {
+		this.room = room;
 	}
 
-	public List<Score> getScores() {
+	@Override
+	public Object getResultObject() {
 		return scores;
 	}
 

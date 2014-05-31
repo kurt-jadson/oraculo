@@ -65,7 +65,7 @@ public class ProtocolWorker {
 			AddInRoomTask task = new AddInRoomTask(SharedInformation.getInstance());
 			task.setClientId(clientId);
 			task.setNickname(nickname);
-			task.setRoom(room);
+			task.setRoomName(room);
 
 			JPPFJob job = createJob("AddInRoom client " + nickname, task);
 			executeBlockingJob(job);
@@ -76,12 +76,8 @@ public class ProtocolWorker {
 
 	private void start(String clientId, String roomName) throws ProtocolWorkerException {
 		try {
-			Room room = new Room();
-			room.setName(roomName);
-
-			Client client = new Client();
-			client.setId(clientId);
-
+			Room room = SharedInformation.getInstance().getRoom(roomName);
+			Client client = SharedInformation.getInstance().getClient(clientId, room);
 			SharedInformation.getInstance().start(client, room);
 		} catch (RoomStartedException ex) {
 			throw new ProtocolWorkerException(ex.getMessage());
@@ -90,8 +86,7 @@ public class ProtocolWorker {
 
 	private void verify(String roomName, Socket socket) throws ProtocolWorkerException {
 		try {
-			Room room = new Room();
-			room.setName(roomName);
+			Room room = SharedInformation.getInstance().getRoom(roomName);
 
 			VerifyTask task = new VerifyTask(SharedInformation.getInstance());
 			task.setRoom(room);
@@ -99,20 +94,24 @@ public class ProtocolWorker {
 			JPPFJob job = createJob("Verify", task);
 			executeBlockingJob(job);
 
-			writer.println(objectToSend.toString());
+			writer.println(objectToSend);
 			writer.flush();
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			throw new ProtocolWorkerException("Impossible to verify answers.");
 		} finally {
 			objectToSend = null;
 		}
 	}
 
-	private void get(String clientId, String room, Socket socket) throws ProtocolWorkerException {
+	private void get(String clientId, String roomName, Socket socket) throws ProtocolWorkerException {
 		try {
+			Room room = SharedInformation.getInstance().getRoom(roomName);
+			Client client = SharedInformation.getInstance().getClient(clientId, room);
+
 			GetQuestionTask task = new GetQuestionTask(SharedInformation.getInstance());
-			task.setClientId(clientId);
 			task.setRoom(room);
+			task.setClient(client);
 
 			JPPFJob job = createJob("GetQuestion", task);
 			executeBlockingJob(job);
@@ -127,8 +126,10 @@ public class ProtocolWorker {
 		}
 	}
 
-	private void score(String room, Socket socket) throws ProtocolWorkerException {
+	private void score(String roomName, Socket socket) throws ProtocolWorkerException {
 		try {
+			Room room = SharedInformation.getInstance().getRoom(roomName);
+
 			GenerateScoreTask task = new GenerateScoreTask(SharedInformation.getInstance());
 			task.setRoom(room);
 
@@ -139,21 +140,24 @@ public class ProtocolWorker {
 			objectOutputStream.writeObject(objectToSend);
 			objectOutputStream.flush();
 		} catch (IOException ex) {
-			throw new ProtocolWorkerException("Could not get score for room " + room);
+			throw new ProtocolWorkerException("Could not get score for room " + roomName);
 		} catch (Exception ex) {
-			throw new ProtocolWorkerException("Could not get score for room " + room);
+			throw new ProtocolWorkerException("Could not get score for room " + roomName);
 		} finally {
 			objectToSend = null;
 		}
 	}
 
-	private void send(String clientId, String room, String questionId, String answer, Socket socket)
+	private void send(String clientId, String roomName, String questionId, String answer, Socket socket)
 			throws ProtocolWorkerException {
 		try {
+			Room room = SharedInformation.getInstance().getRoom(roomName);
+			Client client = SharedInformation.getInstance().getClient(clientId, room);
+
 			Question question = findQuestionById(Long.valueOf(questionId));
 			ProcessAnswerTask task = new ProcessAnswerTask(SharedInformation.getInstance());
-			task.setClientId(clientId);
-			task.setRoomName(room);
+			task.setClient(client);
+			task.setRoom(room);
 			task.setQuestion(question);
 			task.setUserAnswer(QuestionOption.getByIdentifierNumber(Integer.valueOf(answer)));
 
@@ -207,9 +211,6 @@ public class ProtocolWorker {
 				ReturnResultTask returnResultTask = (ReturnResultTask) o;
 				SharedInformation.changeInstance(returnResultTask.getSharedInformation());
 				objectToSend = returnResultTask.getResultObject();
-			} else if (o instanceof GenerateScoreTask) {
-				GenerateScoreTask generateScoreTask = (GenerateScoreTask) o;
-				objectToSend = generateScoreTask.getScores();
 			}
 		}
 	}
