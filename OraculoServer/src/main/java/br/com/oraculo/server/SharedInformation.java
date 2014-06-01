@@ -119,6 +119,10 @@ public class SharedInformation implements Serializable, Mergeable<SharedInformat
 		return questionRound;
 	}
 
+	public boolean isSameQuestionOfTurn(Question question, Room room) {
+		return question.equals(questionInTurn.get(room));
+	}
+
 	public void changeQuestion(Room room) {
 		for (Room r : rooms) {
 			if (r.equals(room)) {

@@ -15,6 +15,7 @@ public class VerifyTask extends ReturnResultTask {
 
 	private Room room;
 	private Boolean verified;
+	private Question question;
 
 	public VerifyTask(SharedInformation sharedInformation) {
 		super(sharedInformation);
@@ -23,6 +24,10 @@ public class VerifyTask extends ReturnResultTask {
 
 	public void setRoom(Room room) {
 		this.room = room;
+	}
+
+	public void setQuestion(Question question) {
+		this.question = question;
 	}
 
 	@Override
@@ -34,29 +39,20 @@ public class VerifyTask extends ReturnResultTask {
 	public void run() {
 		System.out.println("Verifying if all clients answered question ...");
 
-		try {
-			Set<Client> clients = room.getClients();
-			Question question = getSharedInformation().getQuestion(room);
-
-			for (Client client : clients) {
-				System.out.println("Question in turn: " + question);
-				System.out.println("Client: " + client);
-
-				Long startedTime = client.getStartedTime(question);
-				if (startedTime != Client.ALREADY_ANSWERED) {
-					if (startedTime == Client.NOT_YET_ANSWERED) {
-						verified = Boolean.TRUE;
-						System.out.println("Não respondeu, mas vai");
-					}
-					return;
+		Set<Client> clients = room.getClients();
+		for (Client client : clients) {
+			Long startedTime = client.getStartedTime(question);
+			if (startedTime != Client.ALREADY_ANSWERED) {
+				if (startedTime == Client.NOT_YET_ANSWERED) {
+					verified = Boolean.TRUE;
 				}
-				System.out.println("Já respondeu");
+				return;
 			}
+		}
 
-			verified = Boolean.TRUE;
+		verified = Boolean.TRUE;
+		if(getSharedInformation().isSameQuestionOfTurn(question, room)) {
 			getSharedInformation().changeQuestion(room);
-		} catch (NoMoreQuestionsException ex) {
-			//TODO: notificar cliente
 		}
 	}
 }

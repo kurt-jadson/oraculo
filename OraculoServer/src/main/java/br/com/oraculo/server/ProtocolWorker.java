@@ -44,7 +44,7 @@ public class ProtocolWorker {
 		} else if ("start".equals(command)) {
 			start(parameters[0]);
 		} else if ("verify".equals(command)) {
-			verify(parameters[0], socket, clientId);
+			verify(parameters[0], socket, clientId, parameters[1]);
 		} else if ("get".equals(command)) {
 			get(clientId, parameters[0], socket);
 		} else if ("score".equals(command)) {
@@ -92,14 +92,16 @@ public class ProtocolWorker {
 		SharedInformation.getInstance().start(room);
 	}
 
-	private void verify(String roomName, Socket socket, String clientId) throws ProtocolWorkerException {
+	private void verify(String roomName, Socket socket, String clientId, String questionId) 
+			throws ProtocolWorkerException {
 		try {
 			Room room = SharedInformation.getInstance().getRoom(roomName);
+			Question question = findQuestionById(Long.valueOf(questionId));
 
 			VerifyTask task = new VerifyTask(SharedInformation.getInstance());
 			task.setRoom(room);
+			task.setQuestion(question);
 
-			System.out.println("Preparando para executar pedido de " + clientId);
 			JPPFJob job = createJob("Verify", task);
 			executeBlockingJob(job);
 

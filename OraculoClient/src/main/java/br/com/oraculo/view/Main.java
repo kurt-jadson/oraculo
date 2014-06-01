@@ -168,7 +168,7 @@ public class Main extends javax.swing.JFrame {
 		try {
 			if ("Iniciar".equals(evt.getActionCommand())) {
 				socketController.start();
-				socketController.verify();
+				socketController.verify(0l);
 				requestQuestion();
 				btnNext.setText("Confirmar");
 			} else if ("Confirmar".equals(evt.getActionCommand())) {
@@ -191,7 +191,7 @@ public class Main extends javax.swing.JFrame {
 				}
 				score.update(score.getGraphics());
 
-				socketController.verify();
+				socketController.verify(questionId);
 				requestQuestion();
 			}
 

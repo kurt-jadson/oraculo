@@ -74,16 +74,17 @@ public class SocketController {
 		writer.flush();
 	}
 
-	public void verify() throws CommunicationException {
+	public void verify(Long questionId) throws CommunicationException {
 		try {
-			String messageToServer = buildMessage("verify", clientId, room);
+			String messageToServer = buildMessage(
+					"verify", clientId, room, questionId.toString());
 			writer.println(messageToServer);
 			writer.flush();
 
 			String advance = reader.nextLine();
 			if (advance.equals("false")) {
 				Thread.sleep(2000);
-				verify();
+				verify(questionId);
 			}
 		} catch (Exception ex) {
 			throw new CommunicationException();
