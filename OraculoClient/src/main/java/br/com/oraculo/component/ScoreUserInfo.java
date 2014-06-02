@@ -1,6 +1,7 @@
 package br.com.oraculo.component;
 
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,6 +27,7 @@ public class ScoreUserInfo extends JPanel {
 	}
 
 	public ScoreUserInfo(String username, Integer score) {
+		super(new FlowLayout());
 		this.username = username;
 		this.score = score;
 
@@ -33,6 +35,10 @@ public class ScoreUserInfo extends JPanel {
 		JLabel scoreLabel = new JLabel(score.toString());
 		add(usernameLabel);
 		add(scoreLabel);
+
+		usernameLabel.setBounds(usernameLabel.getX(), usernameLabel.getY(), 
+				85, usernameLabel.getHeight());
+		scoreLabel.setBounds(scoreLabel.getX(), scoreLabel.getY(), 40, scoreLabel.getHeight());
 
 		EtchedBorder border = new EtchedBorder(EtchedBorder.RAISED);
 		int yPosition = VERTICAL_PADDING + countUsers * HEIGHT;
@@ -63,10 +69,14 @@ public class ScoreUserInfo extends JPanel {
 
 	@Override
 	public void update(Graphics graphics) {
-		for(Component c : getComponents()) {
-			c.update(c.getGraphics());
-		}
-		super.update(graphics);
+		JLabel usernameLabel = (JLabel) getComponent(0);
+		JLabel scoreLabel = (JLabel) getComponent(1);
+		usernameLabel.setText(username);
+		scoreLabel.setText(score.toString());
+
+		usernameLabel.update(usernameLabel.getGraphics());
+		scoreLabel.update(scoreLabel.getGraphics());
+		super.update(getGraphics());
 	}
 
 }

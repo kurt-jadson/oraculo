@@ -10,6 +10,8 @@ import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
 import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 /**
@@ -20,6 +22,7 @@ public class Main extends javax.swing.JFrame {
 
 	private SocketController socketController;
 	private QuestionScreen questionScreen;
+	private Thread timeoutRequestThread;
 
 	/**
 	 * Creates new form Main
@@ -41,7 +44,7 @@ public class Main extends javax.swing.JFrame {
         shape = new javax.swing.JPanel();
         score = new javax.swing.JPanel();
         commandBar = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        lbTime = new javax.swing.JLabel();
         btnNext = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -55,6 +58,11 @@ public class Main extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         shape.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        shape.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                shapeComponentResized(evt);
+            }
+        });
 
         javax.swing.GroupLayout shapeLayout = new javax.swing.GroupLayout(shape);
         shape.setLayout(shapeLayout);
@@ -64,7 +72,7 @@ public class Main extends javax.swing.JFrame {
         );
         shapeLayout.setVerticalGroup(
             shapeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 427, Short.MAX_VALUE)
+            .addGap(0, 441, Short.MAX_VALUE)
         );
 
         score.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -80,9 +88,10 @@ public class Main extends javax.swing.JFrame {
             .addGap(0, 0, Short.MAX_VALUE)
         );
 
-        jLabel1.setText("Tempo");
+        lbTime.setText("00");
 
         btnNext.setText("Iniciar");
+        btnNext.setEnabled(false);
         btnNext.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnNextActionPerformed(evt);
@@ -94,16 +103,16 @@ public class Main extends javax.swing.JFrame {
         commandBarLayout.setHorizontalGroup(
             commandBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, commandBarLayout.createSequentialGroup()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 260, Short.MAX_VALUE)
-                .addComponent(btnNext, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(lbTime)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 261, Short.MAX_VALUE)
+                .addComponent(btnNext, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         commandBarLayout.setVerticalGroup(
             commandBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(commandBarLayout.createSequentialGroup()
                 .addGroup(commandBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnNext)
-                    .addComponent(jLabel1))
+                    .addComponent(lbTime))
                 .addGap(0, 6, Short.MAX_VALUE))
         );
 
@@ -186,8 +195,36 @@ public class Main extends javax.swing.JFrame {
 
 				//Request room's score
 				List<Score> scores = socketController.score();
+				score.removeAll();
+				ScoreUserInfo.resetCountUsers();
 				for (Score s : scores) {
-					score.add(new ScoreUserInfo(s.getClient().getNickname(), s.getScore()));
+					ScoreUserInfo sui = new ScoreUserInfo(s.getClient().getNickname(), s.getScore());
+					score.add(sui);
+					sui.update(sui.getGraphics());
+				}
+				score.update(score.getGraphics());
+
+				socketController.verify(questionId);
+				requestQuestion();
+			} else if("Prosseguir".equals(evt.getActionCommand())) {
+				Long questionId = questionScreen.getQuestion().getId();
+				QuestionOption correct = socketController.send(questionId, QuestionOption.NONE);
+
+				//Compare receive answer to answer sended
+				if (QuestionOption.NONE.equals(correct)) {
+					System.out.println("Resposta correta.");
+				} else {
+					System.out.println("Resposta incorreta.");
+				}
+
+				//Request room's score
+				List<Score> scores = socketController.score();
+				score.removeAll();
+				ScoreUserInfo.resetCountUsers();
+				for (Score s : scores) {
+					ScoreUserInfo sui = new ScoreUserInfo(s.getClient().getNickname(), s.getScore());
+					score.add(sui);
+					sui.update(sui.getGraphics());
 				}
 				score.update(score.getGraphics());
 
@@ -202,23 +239,56 @@ public class Main extends javax.swing.JFrame {
 
 	private void requestQuestion() throws CommunicationException {
 		Question question = socketController.get();
-		questionScreen = new QuestionScreen(500, 500);
+		questionScreen = new QuestionScreen(shape.getWidth(), shape.getHeight());
 		questionScreen.setQuestion(question);
 		shape.removeAll();
 		shape.add(questionScreen);
 		shape.update(shape.getGraphics());
-		System.out.println("Received " + question);
+
+//		if(timeoutRequestThread != null && timeoutRequestThread.isAlive()) {
+//			timeoutRequestThread.stop();
+//		}
+//
+//		timeoutRequestThread = new Thread(new TimeoutRequester(this, question.getTimeToAnswer()));
+//		timeoutRequestThread.start();
 	}
 
     private void miConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectActionPerformed
 		try {
 			socketController.connect("127.0.0.1", 7777, "sala01", "jadson");
 		} catch(SuccessException ex) {
-			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null, ex.getMessage(), "Success!", JOptionPane.INFORMATION_MESSAGE);
+			btnNext.setEnabled(true);
 		} catch (ClientSideException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_miConnectActionPerformed
+
+    private void shapeComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_shapeComponentResized
+		if(questionScreen != null) {
+			questionScreen.recalculateSizes(shape.getWidth(), shape.getHeight());
+		}
+    }//GEN-LAST:event_shapeComponentResized
+
+	public SocketController getSocketController() {
+		return socketController;
+	}
+
+	public QuestionScreen getQuestionScreen() {
+		return questionScreen;
+	}
+
+	public JButton getBtnNext() {
+		return btnNext;
+	}
+
+	public JLabel getLbTime() {
+		return lbTime;
+	}
+
+	public Thread getTimeoutRequestThread() {
+		return timeoutRequestThread;
+	}
 
 	/**
 	 * @param args the command line arguments
@@ -257,10 +327,10 @@ public class Main extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNext;
     private javax.swing.JPanel commandBar;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JLabel lbTime;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem miConnect;
     private javax.swing.JMenuItem miDisconnect;

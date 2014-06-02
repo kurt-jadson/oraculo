@@ -71,8 +71,13 @@ public class Score implements Serializable, Comparable<Score>, Mergeable<Score> 
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Score{" + "client=" + client + ", room=" + room + ", score=" + score + '}';
+	}
+
 	public int compareTo(Score o) {
-		return this.getScore().compareTo(o.getScore());
+		return o.getScore().compareTo(this.getScore()); //reverse order
 	}
 
 	public void merge(Score m) {

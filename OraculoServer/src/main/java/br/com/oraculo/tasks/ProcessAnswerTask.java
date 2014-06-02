@@ -48,7 +48,7 @@ public class ProcessAnswerTask extends ReturnResultTask {
 
 		//Assumed 2s is delay client-server communication
 		long timeElapsed = client.getTimeElapsed(question) - 2000;
-		boolean timeWasted = timeElapsed > question.getTimeToAnswer();
+		boolean timeWasted = timeElapsed > (question.getTimeToAnswer() * 1000);
 		boolean emptyUserAnswer = QuestionOption.NONE.equals(userAnswer);
 		boolean incorrectAnswer = !userAnswer.equals(question.getAnswer());
 		client.markAsAnswered(question);

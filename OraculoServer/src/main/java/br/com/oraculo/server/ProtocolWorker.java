@@ -108,7 +108,6 @@ public class ProtocolWorker {
 			writer.println(objectToSend);
 			writer.flush();
 		} catch (Exception ex) {
-			ex.printStackTrace();
 			throw new ProtocolWorkerException("Impossible to verify answers.");
 		} finally {
 			objectToSend = null;
