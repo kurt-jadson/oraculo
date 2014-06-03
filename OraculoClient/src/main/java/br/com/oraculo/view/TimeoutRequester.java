@@ -1,8 +1,5 @@
 package br.com.oraculo.view;
 
-import br.com.oraculo.models.Question;
-import br.com.oraculo.models.QuestionOption;
-
 /**
  *
  * @author kurt
@@ -25,14 +22,11 @@ public class TimeoutRequester implements Runnable {
 			timeElapsed = System.currentTimeMillis() - timeStart;
 			Long counter = (timeToAnswer - timeElapsed) / 1000;
 			main.getLbTime().setText(Integer.valueOf(counter.intValue()).toString());
-			main.getLbTime().update(main.getLbTime().getGraphics());
 		}
 
 		if(!main.getQuestionScreen().wasConfirmSent()) {
 			main.getBtnNext().setText("Prosseguir");
 		}
-
-		main.getTimeoutRequestThread().stop();
 	}
 	
 }

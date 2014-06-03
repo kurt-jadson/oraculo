@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -22,7 +23,6 @@ public class Main extends javax.swing.JFrame {
 
 	private SocketController socketController;
 	private QuestionScreen questionScreen;
-	private Thread timeoutRequestThread;
 
 	/**
 	 * Creates new form Main
@@ -30,6 +30,7 @@ public class Main extends javax.swing.JFrame {
 	public Main() {
 		initComponents();
 		socketController = new SocketController();
+		new Thread(new UpdateScreen(this)).start();
 	}
 
 	/**
@@ -58,11 +59,6 @@ public class Main extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         shape.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        shape.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent evt) {
-                shapeComponentResized(evt);
-            }
-        });
 
         javax.swing.GroupLayout shapeLayout = new javax.swing.GroupLayout(shape);
         shape.setLayout(shapeLayout);
@@ -72,7 +68,7 @@ public class Main extends javax.swing.JFrame {
         );
         shapeLayout.setVerticalGroup(
             shapeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 441, Short.MAX_VALUE)
+            .addGap(0, 443, Short.MAX_VALUE)
         );
 
         score.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -182,6 +178,7 @@ public class Main extends javax.swing.JFrame {
 				btnNext.setText("Confirmar");
 			} else if ("Confirmar".equals(evt.getActionCommand())) {
 				//Send answer to server and receive correct answer from.
+				questionScreen.confirmSent();
 				Long questionId = questionScreen.getQuestion().getId();
 				QuestionOption response = questionScreen.getSelected();
 				QuestionOption correct = socketController.send(questionId, response);
@@ -244,13 +241,7 @@ public class Main extends javax.swing.JFrame {
 		shape.removeAll();
 		shape.add(questionScreen);
 		shape.update(shape.getGraphics());
-
-//		if(timeoutRequestThread != null && timeoutRequestThread.isAlive()) {
-//			timeoutRequestThread.stop();
-//		}
-//
-//		timeoutRequestThread = new Thread(new TimeoutRequester(this, question.getTimeToAnswer()));
-//		timeoutRequestThread.start();
+		new Thread(new TimeoutRequester(this, question.getTimeToAnswer())).start();
 	}
 
     private void miConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectActionPerformed
@@ -263,12 +254,6 @@ public class Main extends javax.swing.JFrame {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_miConnectActionPerformed
-
-    private void shapeComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_shapeComponentResized
-		if(questionScreen != null) {
-			questionScreen.recalculateSizes(shape.getWidth(), shape.getHeight());
-		}
-    }//GEN-LAST:event_shapeComponentResized
 
 	public SocketController getSocketController() {
 		return socketController;
@@ -286,8 +271,8 @@ public class Main extends javax.swing.JFrame {
 		return lbTime;
 	}
 
-	public Thread getTimeoutRequestThread() {
-		return timeoutRequestThread;
+	public JPanel getShapeQuestion() {
+		return shape;
 	}
 
 	/**
