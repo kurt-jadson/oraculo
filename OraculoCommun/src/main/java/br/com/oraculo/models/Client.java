@@ -17,6 +17,7 @@ public class Client implements Serializable, Mergeable<Client> {
 	private String id;
 	private String nickname;
 	private Map<Question, Long> timeoutQuestion;
+	private Boolean connected;
 
 	public Client() {
 		timeoutQuestion = new HashMap<Question, Long>();
@@ -60,6 +61,18 @@ public class Client implements Serializable, Mergeable<Client> {
 		return timeoutQuestion;
 	}
 
+	public boolean isConnected() {
+		return connected == null ? false : connected.booleanValue();
+	}
+
+	public Boolean getConnected() {
+		return connected;
+	}
+
+	public void setConnected(Boolean connected) {
+		this.connected = connected;
+	}
+
 	@Override
 	public int hashCode() {
 		int hash = 7;
@@ -100,6 +113,9 @@ public class Client implements Serializable, Mergeable<Client> {
 			}
 		}
 
+		if(m.getConnected() != null && Boolean.FALSE.equals(m.getConnected())) {
+			setConnected(false);
+		}
 	}
 
 }

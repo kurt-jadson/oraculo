@@ -3,6 +3,7 @@ package br.com.oraculo.component;
 import br.com.oraculo.listeners.OptionClickListener;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
+import java.awt.Color;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -34,7 +35,6 @@ public class QuestionScreen extends JPanel {
 
 	private void drawQuestionArea() {
 		questionAreaPanel = new JPanel();
-//		questionAreaPanel.setLayout(new GridLayout());
 		questionAreaPanel.setBounds(20, 20, width - 20, height - 346);
 		add(questionAreaPanel);
 	}
@@ -48,6 +48,7 @@ public class QuestionScreen extends JPanel {
 			QuestionOption option = options[i];
 
 			JButton optionButton = new JButton();
+			optionButton.setBackground(new Color(123, 123, 123));
 			optionButton.setBounds(10, 20 + 64*i + questionArea, width - 20, 64);
 			optionButton.addActionListener(optionClickListener);
 			optionButton.setActionCommand(Integer.valueOf(option.getIdentifierNumber()).toString());
@@ -81,6 +82,22 @@ public class QuestionScreen extends JPanel {
 
 	public void setSelected(QuestionOption selected) {
 		this.selected = selected;
+
+		for(int i = 0, j = alternatives.length; i < j; i++) {
+			if(selected.getIdentifierNumber() == i + 1) {
+				alternatives[i].setBackground(new Color(207, 157, 6));
+			} else {
+				alternatives[i].setBackground(new Color(123, 123, 123));
+			}
+		}
+	}
+
+	public void setCorrectAnswer(QuestionOption answer) {
+		alternatives[answer.getIdentifierNumber() - 1].setBackground(new Color(7, 124, 40));
+
+		if(!answer.equals(selected)) {
+			alternatives[selected.getIdentifierNumber() - 1].setBackground(new Color(217, 0, 0));
+		}
 	}
 
 	public void recalculateSizes(int width, int height) {

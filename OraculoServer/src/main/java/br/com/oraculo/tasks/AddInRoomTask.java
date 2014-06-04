@@ -24,6 +24,7 @@ public class AddInRoomTask extends ReturnResultTask {
 		Client client = new Client();
 		client.setId(clientId);
 		client.setNickname(nickname);
+		client.setConnected(Boolean.TRUE);
 
 		Room room = new Room();
 		room.setName(roomName);

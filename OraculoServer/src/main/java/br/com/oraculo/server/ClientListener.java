@@ -4,6 +4,7 @@ import br.com.oraculo.exceptions.ServerException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +18,8 @@ public class ClientListener implements Runnable {
 	private Scanner reader;
 	private Socket socket;
 	private ProtocolWorker protocolWorker;
+	private String clientId;
+	private String roomName;
 
 	public ClientListener(Socket socket) {
 		try {
@@ -24,11 +27,19 @@ public class ClientListener implements Runnable {
 			protocolWorker = new ProtocolWorker();
 			reader = new Scanner(socket.getInputStream());
 		} catch (IOException ex) {
-			//notificar o cliente
+			Logger.getLogger(ClientListener.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
 	public void run() {
+		try {
+			readMessages();
+		} catch (ServerException ex) {
+			sendErrorToClient(ex);
+		}
+	}
+
+	private void readMessages() throws ServerException {
 		try {
 			String message;
 			while ((message = reader.nextLine()) != null) {
@@ -40,19 +51,28 @@ public class ClientListener implements Runnable {
 				}
 
 				String command = all[0];
-				String clientId = all[1];
+				clientId = all[1];
+				roomName = parameters[0];
+
 				protocolWorker.execute(command, clientId, socket, parameters);
 			}
-		} catch (ServerException ex) {
-			ex.printStackTrace();
-			PrintWriter writer;
+		} catch (NoSuchElementException nsee) {
 			try {
-				writer = new PrintWriter(socket.getOutputStream());
-				writer.println(ex.getErrorId());
-				writer.flush();
-			} catch (IOException ex1) {
-				Logger.getLogger(ClientListener.class.getName()).log(Level.SEVERE, null, ex1);
+				protocolWorker.execute("disconnect", clientId, socket, roomName);
+			} catch (ServerException ex) {
+				Logger.getLogger(ClientListener.class.getName()).log(Level.SEVERE, null, ex);
 			}
+		}
+	}
+
+	private void sendErrorToClient(ServerException ex) {
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(socket.getOutputStream());
+			writer.println(ex.getErrorId());
+			writer.flush();
+		} catch (IOException ex1) {
+			Logger.getLogger(ClientListener.class.getName()).log(Level.SEVERE, null, ex1);
 		}
 	}
 }

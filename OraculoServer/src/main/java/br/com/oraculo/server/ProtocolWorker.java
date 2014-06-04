@@ -76,8 +76,6 @@ public class ProtocolWorker {
 				throw new RoomStartedException();
 			}
 
-			System.out.println(SharedInformation.getInstance().getClients(room));
-
 			writer.println("done");
 			writer.flush();
 		} catch (ServerException ex) {
@@ -177,13 +175,18 @@ public class ProtocolWorker {
 			writer.println(question.getAnswer().getIdentifierNumber());
 			writer.flush();
 		} catch (Exception ex) {
-			ex.printStackTrace();
 			throw new ProtocolWorkerException("Could not send answer.");
 		}
 
 	}
 
 	private void disconnect(String clientId, String roomName) {
+		System.out.println("Disconnecting client");
+		Room r = new Room();
+		r.setName(roomName);
+
+		Client c = SharedInformation.getInstance().getClient(clientId, r);
+		c.setConnected(Boolean.FALSE);
 		writer.close();
 		reader.close();
 	}

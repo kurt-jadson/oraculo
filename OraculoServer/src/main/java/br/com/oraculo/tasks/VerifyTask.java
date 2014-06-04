@@ -42,7 +42,7 @@ public class VerifyTask extends ReturnResultTask {
 		Set<Client> clients = room.getClients();
 		for (Client client : clients) {
 			Long startedTime = client.getStartedTime(question);
-			if (startedTime != Client.ALREADY_ANSWERED) {
+			if (startedTime != Client.ALREADY_ANSWERED && client.isConnected()) {
 				if (startedTime == Client.NOT_YET_ANSWERED) {
 					verified = Boolean.TRUE;
 				}

@@ -68,7 +68,7 @@ public class Main extends javax.swing.JFrame {
         );
         shapeLayout.setVerticalGroup(
             shapeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 443, Short.MAX_VALUE)
+            .addGap(0, 445, Short.MAX_VALUE)
         );
 
         score.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -123,6 +123,12 @@ public class Main extends javax.swing.JFrame {
         jMenu1.add(miConnect);
 
         miDisconnect.setText("Desconectar");
+        miDisconnect.setEnabled(false);
+        miDisconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miDisconnectActionPerformed(evt);
+            }
+        });
         jMenu1.add(miDisconnect);
         jMenu1.add(jSeparator1);
 
@@ -177,62 +183,46 @@ public class Main extends javax.swing.JFrame {
 				requestQuestion();
 				btnNext.setText("Confirmar");
 			} else if ("Confirmar".equals(evt.getActionCommand())) {
-				//Send answer to server and receive correct answer from.
-				questionScreen.confirmSent();
-				Long questionId = questionScreen.getQuestion().getId();
-				QuestionOption response = questionScreen.getSelected();
-				QuestionOption correct = socketController.send(questionId, response);
-
-				//Compare receive answer to answer sended
-				if (response.equals(correct)) {
-					System.out.println("Resposta correta.");
-				} else {
-					System.out.println("Resposta incorreta.");
-				}
-
-				//Request room's score
-				List<Score> scores = socketController.score();
-				score.removeAll();
-				ScoreUserInfo.resetCountUsers();
-				for (Score s : scores) {
-					ScoreUserInfo sui = new ScoreUserInfo(s.getClient().getNickname(), s.getScore());
-					score.add(sui);
-					sui.update(sui.getGraphics());
-				}
-				score.update(score.getGraphics());
-
-				socketController.verify(questionId);
-				requestQuestion();
-			} else if("Prosseguir".equals(evt.getActionCommand())) {
-				Long questionId = questionScreen.getQuestion().getId();
-				QuestionOption correct = socketController.send(questionId, QuestionOption.NONE);
-
-				//Compare receive answer to answer sended
-				if (QuestionOption.NONE.equals(correct)) {
-					System.out.println("Resposta correta.");
-				} else {
-					System.out.println("Resposta incorreta.");
-				}
-
-				//Request room's score
-				List<Score> scores = socketController.score();
-				score.removeAll();
-				ScoreUserInfo.resetCountUsers();
-				for (Score s : scores) {
-					ScoreUserInfo sui = new ScoreUserInfo(s.getClient().getNickname(), s.getScore());
-					score.add(sui);
-					sui.update(sui.getGraphics());
-				}
-				score.update(score.getGraphics());
-
-				socketController.verify(questionId);
-				requestQuestion();
+				request(questionScreen.getSelected());
+				btnNext.setText("Continuar");
+			} else if ("Prosseguir".equals(evt.getActionCommand())) {
+				request(questionScreen.getSelected());
+				btnNext.setText("Confirmar");
+			} else if ("Continuar".equals(evt.getActionCommand())) {
+				request(null);
+				btnNext.setText("Confirmar");
 			}
 
 		} catch (CommunicationException ce) {
 			JOptionPane.showMessageDialog(null, ce.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_btnNextActionPerformed
+
+	private void request(QuestionOption response) throws CommunicationException {
+		Long questionId = questionScreen.getQuestion().getId();
+
+		if (response != null) {
+			//Send answer to server and receive correct answer from.
+			questionScreen.confirmSent();
+			QuestionOption correct = socketController.send(questionId, response);
+			questionScreen.setCorrectAnswer(correct);
+		} else {
+			socketController.verify(questionId);
+
+			//Request room's score
+			List<Score> scores = socketController.score();
+			score.removeAll();
+			ScoreUserInfo.resetCountUsers();
+			for (Score s : scores) {
+				ScoreUserInfo sui = new ScoreUserInfo(s.getClient().getNickname(), s.getScore());
+				score.add(sui);
+				sui.update(sui.getGraphics());
+			}
+			score.update(score.getGraphics());
+
+			requestQuestion();
+		}
+	}
 
 	private void requestQuestion() throws CommunicationException {
 		Question question = socketController.get();
@@ -247,13 +237,21 @@ public class Main extends javax.swing.JFrame {
     private void miConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectActionPerformed
 		try {
 			socketController.connect("127.0.0.1", 7777, "sala01", "jadson");
-		} catch(SuccessException ex) {
+		} catch (SuccessException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Success!", JOptionPane.INFORMATION_MESSAGE);
 			btnNext.setEnabled(true);
+			miConnect.setEnabled(false);
+			miDisconnect.setEnabled(true);
 		} catch (ClientSideException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_miConnectActionPerformed
+
+    private void miDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miDisconnectActionPerformed
+		socketController.disconnect();
+		miConnect.setEnabled(true);
+		miDisconnect.setEnabled(false);
+    }//GEN-LAST:event_miDisconnectActionPerformed
 
 	public SocketController getSocketController() {
 		return socketController;
