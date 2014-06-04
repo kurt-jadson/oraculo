@@ -6,6 +6,7 @@ import br.com.oraculo.controller.SocketController;
 import br.com.oraculo.exceptions.ClientSideException;
 import br.com.oraculo.exceptions.CommunicationException;
 import br.com.oraculo.exceptions.SuccessException;
+import br.com.oraculo.model.SettingsModel;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
@@ -23,6 +24,8 @@ public class Main extends javax.swing.JFrame {
 
 	private SocketController socketController;
 	private QuestionScreen questionScreen;
+	private Settings settings;
+	private SettingsModel settingsModel;
 
 	/**
 	 * Creates new form Main
@@ -30,7 +33,12 @@ public class Main extends javax.swing.JFrame {
 	public Main() {
 		initComponents();
 		socketController = new SocketController();
+		settingsModel = new SettingsModel();
 		new Thread(new UpdateScreen(this)).start();
+
+		settingsModel.setHost("127.0.0.1");
+		settingsModel.setPort(7777);
+		settingsModel.setRoom("sala01");
 	}
 
 	/**
@@ -140,6 +148,11 @@ public class Main extends javax.swing.JFrame {
         jMenu2.setText("Opções");
 
         miSettings.setText("Preferências");
+        miSettings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miSettingsActionPerformed(evt);
+            }
+        });
         jMenu2.add(miSettings);
 
         menuBar.add(jMenu2);
@@ -236,7 +249,11 @@ public class Main extends javax.swing.JFrame {
 
     private void miConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectActionPerformed
 		try {
-			socketController.connect("127.0.0.1", 7777, "sala01", "jadson");
+			socketController.connect(
+					settingsModel.getHost(), 
+					settingsModel.getPort(), 
+					settingsModel.getRoom(), 
+					settingsModel.getClientName());
 		} catch (SuccessException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Success!", JOptionPane.INFORMATION_MESSAGE);
 			btnNext.setEnabled(true);
@@ -252,6 +269,17 @@ public class Main extends javax.swing.JFrame {
 		miConnect.setEnabled(true);
 		miDisconnect.setEnabled(false);
     }//GEN-LAST:event_miDisconnectActionPerformed
+
+    private void miSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSettingsActionPerformed
+		if(settings == null) {
+			settings = new Settings(this);
+		} else {
+			settings.dispose();
+			settings= new Settings(this);
+		}
+
+		settings.setVisible(true);
+    }//GEN-LAST:event_miSettingsActionPerformed
 
 	public SocketController getSocketController() {
 		return socketController;
@@ -271,6 +299,10 @@ public class Main extends javax.swing.JFrame {
 
 	public JPanel getShapeQuestion() {
 		return shape;
+	}
+
+	public SettingsModel getSettingsModel() {
+		return settingsModel;
 	}
 
 	/**

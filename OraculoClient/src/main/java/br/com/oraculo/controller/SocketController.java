@@ -27,6 +27,11 @@ public class SocketController {
 	private Scanner reader;
 
 	public void connect(String host, int port, String room, String nickname) throws ClientSideException {
+
+		if(nickname == null || nickname.trim().length() == 0) {
+			throw new ClientSideException("Please, enter in \"Settings\" and fill nickname!");
+		}
+
 		try {
 			socket = new Socket(host, port);
 			clientId = getClientIdentifier();
