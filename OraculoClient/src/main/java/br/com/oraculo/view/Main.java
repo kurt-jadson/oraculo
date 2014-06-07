@@ -5,6 +5,7 @@ import br.com.oraculo.component.ScoreUserInfo;
 import br.com.oraculo.controller.SocketController;
 import br.com.oraculo.exceptions.ClientSideException;
 import br.com.oraculo.exceptions.CommunicationException;
+import br.com.oraculo.exceptions.QuestionUnavaliableException;
 import br.com.oraculo.exceptions.SuccessException;
 import br.com.oraculo.model.SettingsModel;
 import br.com.oraculo.models.Question;
@@ -26,6 +27,7 @@ public class Main extends javax.swing.JFrame {
 	private QuestionScreen questionScreen;
 	private Settings settings;
 	private SettingsModel settingsModel;
+	private boolean busy;
 
 	/**
 	 * Creates new form Main
@@ -34,7 +36,6 @@ public class Main extends javax.swing.JFrame {
 		initComponents();
 		socketController = new SocketController();
 		settingsModel = new SettingsModel();
-		new Thread(new UpdateScreen(this)).start();
 
 		settingsModel.setHost("127.0.0.1");
 		settingsModel.setPort(7777);
@@ -206,12 +207,18 @@ public class Main extends javax.swing.JFrame {
 				btnNext.setText("Confirmar");
 			}
 
+		} catch(QuestionUnavaliableException ex) {
+			btnNext.setEnabled(false);
+			busy = false;
+			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		} catch (CommunicationException ce) {
 			JOptionPane.showMessageDialog(null, ce.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+		} catch(ClientSideException ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_btnNextActionPerformed
 
-	private void request(QuestionOption response) throws CommunicationException {
+	private void request(QuestionOption response) throws ClientSideException {
 		Long questionId = questionScreen.getQuestion().getId();
 
 		if (response != null) {
@@ -237,8 +244,13 @@ public class Main extends javax.swing.JFrame {
 		}
 	}
 
-	private void requestQuestion() throws CommunicationException {
+	private void requestQuestion() throws ClientSideException {
 		Question question = socketController.get();
+
+		if(question == null) {
+			throw new QuestionUnavaliableException();
+		}
+
 		questionScreen = new QuestionScreen(shape.getWidth(), shape.getHeight());
 		questionScreen.setQuestion(question);
 		shape.removeAll();
@@ -259,6 +271,8 @@ public class Main extends javax.swing.JFrame {
 			btnNext.setEnabled(true);
 			miConnect.setEnabled(false);
 			miDisconnect.setEnabled(true);
+			busy = true;
+			new Thread(new UpdateScreen(this)).start();
 		} catch (ClientSideException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}
@@ -268,6 +282,7 @@ public class Main extends javax.swing.JFrame {
 		socketController.disconnect();
 		miConnect.setEnabled(true);
 		miDisconnect.setEnabled(false);
+		busy = false;
     }//GEN-LAST:event_miDisconnectActionPerformed
 
     private void miSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSettingsActionPerformed
@@ -303,6 +318,10 @@ public class Main extends javax.swing.JFrame {
 
 	public SettingsModel getSettingsModel() {
 		return settingsModel;
+	}
+
+	public boolean isBusy() {
+		return busy;
 	}
 
 	/**

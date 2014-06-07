@@ -13,7 +13,7 @@ public class UpdateScreen implements Runnable {
 	}
 
 	public void run() {
-		while(true) {
+		while(main.isBusy()) {
 			main.getLbTime().update(main.getLbTime().getGraphics());
 			if(main.getQuestionScreen() != null) {
 				main.getQuestionScreen().recalculateSizes(main.getShapeQuestion().getWidth(),
