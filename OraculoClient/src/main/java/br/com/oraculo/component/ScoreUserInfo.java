@@ -1,6 +1,6 @@
 package br.com.oraculo.component;
 
-import java.awt.Component;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import javax.swing.JLabel;
@@ -31,6 +31,8 @@ public class ScoreUserInfo extends JPanel {
 		this.username = username;
 		this.score = score;
 
+		setBackground(new Color(123, 123, 123));
+
 		JLabel usernameLabel = new JLabel(username);
 		JLabel scoreLabel = new JLabel(score.toString());
 		add(usernameLabel);
@@ -40,7 +42,7 @@ public class ScoreUserInfo extends JPanel {
 				85, usernameLabel.getHeight());
 		scoreLabel.setBounds(scoreLabel.getX(), scoreLabel.getY(), 40, scoreLabel.getHeight());
 
-		EtchedBorder border = new EtchedBorder(EtchedBorder.RAISED);
+		EtchedBorder border = new EtchedBorder(EtchedBorder.LOWERED);
 		int yPosition = VERTICAL_PADDING + countUsers * HEIGHT;
 		setBounds(HORIZONTAL_PADDING, yPosition, WIDTH, HEIGHT);
 		setBorder(border);

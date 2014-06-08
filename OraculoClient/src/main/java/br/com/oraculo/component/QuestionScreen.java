@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.jdesktop.swingx.JXLabel;
 
 /**
  *
@@ -60,7 +61,8 @@ public class QuestionScreen extends JPanel {
 	public void setQuestion(Question question) {
 		this.question = question;
 
-		JLabel labelQuestion = new JLabel(question.getQuestion());
+		JXLabel labelQuestion = new JXLabel(question.getQuestion());
+		labelQuestion.setLineWrap(true);
 		labelQuestion.setBounds(20, 0, questionAreaPanel.getWidth() - 10, 
 				questionAreaPanel.getHeight() - 10);
 		questionAreaPanel.add(labelQuestion);
@@ -92,29 +94,47 @@ public class QuestionScreen extends JPanel {
 		}
 	}
 
+	public void setDisabledOptions() {
+		for(JButton b : alternatives) {
+			b.setEnabled(false);
+		}
+	}
+
+	public void setEnabledOptions() {
+		for(JButton b : alternatives) {
+			b.setEnabled(true);
+		}
+	}
+
 	public void setCorrectAnswer(QuestionOption answer) {
 		alternatives[answer.getIdentifierNumber() - 1].setBackground(new Color(7, 124, 40));
 
-		if(!answer.equals(selected)) {
+		if(!answer.equals(selected) && !QuestionOption.NONE.equals(selected)) {
 			alternatives[selected.getIdentifierNumber() - 1].setBackground(new Color(217, 0, 0));
 		}
 	}
 
 	public void recalculateSizes(int width, int height) {
-		int heightQuestionArea = height - 346;
-		int widthQuestionArea = width - 20;
-		setBounds(0, 0, width, height);
-		questionAreaPanel.setBounds(0, 0, widthQuestionArea, heightQuestionArea);
-
-		JLabel label = (JLabel) questionAreaPanel.getComponent(0);
-		label.setBounds(20, 0, 
-				widthQuestionArea - 10, heightQuestionArea - 10);
-		label.setAlignmentX(CENTER_ALIGNMENT);
-		label.setAlignmentY(CENTER_ALIGNMENT);
-
-		int i = 0;
-		for(JButton b : alternatives) {
-			b.setBounds(10, 20 + 64*i++ + heightQuestionArea, widthQuestionArea, 64);
+		try {
+			int heightQuestionArea = height - 346;
+			int widthQuestionArea = width - 20;
+			setBounds(0, 0, width, height);
+			questionAreaPanel.setBounds(0, 0, widthQuestionArea, heightQuestionArea);
+			
+			if(questionAreaPanel.getComponentCount() > 0) {
+				JXLabel label = (JXLabel) questionAreaPanel.getComponent(0);
+				label.setBounds(20, 0,
+						widthQuestionArea - 10, heightQuestionArea - 10);
+				label.setAlignmentX(CENTER_ALIGNMENT);
+				label.setAlignmentY(CENTER_ALIGNMENT);
+			}
+			
+			int i = 0;
+			for(JButton b : alternatives) {
+				b.setBounds(10, 20 + 64*i++ + heightQuestionArea, widthQuestionArea, 64);
+			}
+		} catch(Exception ex) {
+			//don't stop application on resize components in window	
 		}
 	}
 

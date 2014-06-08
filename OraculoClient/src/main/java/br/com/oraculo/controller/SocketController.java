@@ -46,7 +46,7 @@ public class SocketController {
 
 			String response = reader.nextLine();
 			if ("done".equals(response)) {
-				throw new SuccessException("Connected");
+				throw new SuccessException("Conectado!");
 			} else {
 				throw new ServerException(Integer.valueOf(response));
 			}

@@ -25,6 +25,7 @@ public class TimeoutRequester implements Runnable {
 		}
 
 		if(!main.getQuestionScreen().wasConfirmSent()) {
+			main.getQuestionScreen().setDisabledOptions();
 			main.getBtnNext().setText("Prosseguir");
 		}
 	}

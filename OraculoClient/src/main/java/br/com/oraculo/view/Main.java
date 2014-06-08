@@ -11,6 +11,7 @@ import br.com.oraculo.model.SettingsModel;
 import br.com.oraculo.models.Question;
 import br.com.oraculo.models.QuestionOption;
 import br.com.oraculo.models.Score;
+import java.awt.FlowLayout;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -40,6 +41,10 @@ public class Main extends javax.swing.JFrame {
 		settingsModel.setHost("127.0.0.1");
 		settingsModel.setPort(7777);
 		settingsModel.setRoom("sala01");
+
+		JLabel label = new JLabel("<html>Acesse preferências, preencha os dados para conexão e clique em \"Conectar\". Aguarde até que todos os usuários se conectem na sala para então iniciar a partida. Uma vez iniciada a partida ninguém mais poderá se conectar a sala.</html>");
+		label.setBounds(FlowLayout.CENTER, FlowLayout.CENTER, 200, 500);
+		shape.add(label);
 	}
 
 	/**
@@ -201,7 +206,8 @@ public class Main extends javax.swing.JFrame {
 				btnNext.setText("Continuar");
 			} else if ("Prosseguir".equals(evt.getActionCommand())) {
 				request(questionScreen.getSelected());
-				btnNext.setText("Confirmar");
+				btnNext.setText("Continuar");
+				getQuestionScreen().setEnabledOptions();
 			} else if ("Continuar".equals(evt.getActionCommand())) {
 				request(null);
 				btnNext.setText("Confirmar");
@@ -211,6 +217,13 @@ public class Main extends javax.swing.JFrame {
 			btnNext.setEnabled(false);
 			busy = false;
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+
+			shape.removeAll();
+			JLabel label = new JLabel("Fim de partida!");
+			label.setBounds(FlowLayout.CENTER, FlowLayout.CENTER, 300, 500);
+			shape.add(label);
+			score.update(score.getGraphics());
+			shape.update(shape.getGraphics());
 		} catch (CommunicationException ce) {
 			JOptionPane.showMessageDialog(null, ce.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		} catch(ClientSideException ex) {
@@ -273,6 +286,7 @@ public class Main extends javax.swing.JFrame {
 			miDisconnect.setEnabled(true);
 			busy = true;
 			new Thread(new UpdateScreen(this)).start();
+			btnNext.setText("Iniciar");
 		} catch (ClientSideException ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
 		}

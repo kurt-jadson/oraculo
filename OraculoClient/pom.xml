@@ -18,6 +18,13 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+					<archive>
+						<manifest>
+							<mainClass>br.com.oraculo.view.Main</mainClass>
+							<packageName>br.com.oraculo.view</packageName>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
                 </configuration>
             </plugin>
         </plugins>
@@ -37,6 +44,12 @@
 	  <groupId>${project.groupId}</groupId>
 	  <artifactId>OraculoCommun</artifactId>
 	  <version>${project.version}</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>com.kenai.nbpwr</groupId>
+	  <artifactId>org-jdesktop-swingx</artifactId>
+	  <version>1.6-201002261215</version>
+	  <type>nbm</type>
 	 </dependency>
 	</dependencies>
 </project>

@@ -18,6 +18,13 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+					<archive>
+						<manifest>
+							<mainClass>br.com.oraculo.server.MainServer</mainClass>
+							<packageName>br.com.oraculo.server</packageName>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
                 </configuration>
             </plugin>
         </plugins>
