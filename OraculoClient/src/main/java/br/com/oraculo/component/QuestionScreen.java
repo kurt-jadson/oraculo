@@ -6,7 +6,6 @@ import br.com.oraculo.models.QuestionOption;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.jdesktop.swingx.JXLabel;
 

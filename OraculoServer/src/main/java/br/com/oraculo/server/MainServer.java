@@ -46,8 +46,20 @@ public class MainServer {
 
 	public static void main(String[] args) {
 		Scanner scanner = null;
+
+		//Make compatible with netbeans directory development
+		File file = new File("src/main/resources/META-INF/config/settings.txt");
+
+		if(!file.exists()) {
+			file = new File("META-INF/config/settings.txt");
+		}
+
+		//External file
+		if(!file.exists()) {
+			file = new File("config/settings.txt");
+		}
+
 		try {
-			File file = new File("src/main/resources/config/settings.txt");
 			scanner = new Scanner(file);
 			String config = scanner.nextLine();
 
